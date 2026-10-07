@@ -1,1 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>UPS Daily Attendance</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
+</head>
+
+<body>
+
+  <!-- ========================================
+       APP WRAPPER
+  ========================================= -->
+  <div id="app">
+
+    <!-- ========================================
+         LOGIN PAGE
+    ========================================= -->
+    <section
+      id="loginView"
+      class="view active-view"
+    >
+
+      <div class="login-shell">
+
+        <div class="login-card">
+
+          <div class="brand-block">
+
+            <div class="school-badge">
+              UPS
+            </div>
+
+            <div>
+              <h1>
+                UPS Daily Attendance
+              </h1>
+
+              <p>
+                Universal Philippine School
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="login-divider"></div>
+
+
+          <div class="login-content">
+
+            <h2>
+              Welcome
+            </h2>
+
+            <p class="login-description">
+              Enter your registered school email
+              to continue.
+            </p>
+
+
+            <label
+              for="loginEmail"
+              class="field-label"
+            >
+              Email Address
+            </label>
+
+            <input
+              type="email"
+              id="loginEmail"
+              class="form-input"
+              placeholder="name@school.com"
+              autocomplete="email"
+            />
+
+
+            <button
+              id="loginButton"
+              class="primary-button full-width"
+              type="button"
+            >
+              Continue
+            </button>
+
+
+            <p
+              id="loginMessage"
+              class="form-message"
+            ></p>
+
+          </div>
+
+
+          <div class="login-footer">
+            UPS Academic Office
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ========================================
+         MAIN APPLICATION
+    ========================================= -->
+    <section
+      id="mainView"
+      class="view"
+    >
+
+      <!-- ===========================
+           TOP HEADER
+      ============================ -->
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <div class="topbar-logo">
+            UPS
+          </div>
+
+          <div>
+
+            <h1 class="topbar-title">
+              Daily Attendance
+            </h1>
+
+            <p class="topbar-subtitle">
+              Universal Philippine School
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="topbar-right">
+
+          <div class="user-summary">
+
+            <strong id="headerUserName">
+              User
+            </strong>
+
+            <span id="headerUserRole">
+              Role
+            </span>
+
+          </div>
+
+          <button
+            id="logoutButton"
+            class="secondary-button"
+            type="button"
+          >
+            Log Out
+          </button>
+
+        </div>
+
+      </header>
+
+
+
+      <!-- ===========================
+           ADMIN VIEW
+      ============================ -->
+      <main
+        id="adminView"
+        class="dashboard-view hidden"
+      >
+
+        <div class="page-container">
+
+          <!-- PAGE HEADER -->
+          <div class="page-heading-row">
+
+            <div>
+
+              <h2>
+                Attendance Dashboard
+              </h2>
+
+              <p>
+                Monitor daily class submissions
+                and student attendance.
+              </p>
+
+            </div>
+
+
+            <div class="date-controls">
+
+              <button
+                id="adminPreviousDate"
+                class="icon-button"
+                type="button"
+                title="Previous day"
+              >
+                ‹
+              </button>
+
+              <input
+                type="date"
+                id="adminDateInput"
+                class="date-input"
+              />
+
+              <button
+                id="adminNextDate"
+                class="icon-button"
+                type="button"
+                title="Next day"
+              >
+                ›
+              </button>
+
+              <button
+                id="adminTodayButton"
+                class="secondary-button"
+                type="button"
+              >
+                Today
+              </button>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- PRIMARY KPI CARDS -->
+          <section class="kpi-grid primary-kpi-grid">
+
+            <article class="kpi-card">
+              <span class="kpi-label">
+                Total Classes
+              </span>
+
+              <strong
+                id="kpiTotalClasses"
+                class="kpi-value"
+              >
+                0
+              </strong>
+            </article>
+
+
+            <article class="kpi-card">
+              <span class="kpi-label">
+                Submission Progress
+              </span>
+
+              <strong
+                id="kpiSubmissionProgress"
+                class="kpi-value"
+              >
+                0%
+              </strong>
+            </article>
+
+
+            <article class="kpi-card">
+              <span class="kpi-label">
+                Students Recorded
+              </span>
+
+              <strong
+                id="kpiRecordedStudents"
+                class="kpi-value"
+              >
+                0
+              </strong>
+            </article>
+
+
+            <article class="kpi-card">
+              <span class="kpi-label">
+                Absentee Rate
+              </span>
+
+              <strong
+                id="kpiAbsenteeRate"
+                class="kpi-value"
+              >
+                0%
+              </strong>
+            </article>
+
+          </section>
+
+
+
+          <!-- SECONDARY KPI CARDS -->
+          <section class="kpi-grid secondary-kpi-grid">
+
+            <article class="status-card present-card">
+              <span>
+                Present
+              </span>
+
+              <strong id="summaryPresent">
+                0
+              </strong>
+
+              <small id="summaryPresentPercent">
+                0%
+              </small>
+            </article>
+
+
+            <article class="status-card absent-card">
+              <span>
+                Absent
+              </span>
+
+              <strong id="summaryAbsent">
+                0
+              </strong>
+
+              <small id="summaryAbsentPercent">
+                0%
+              </small>
+            </article>
+
+
+            <article class="status-card late-card">
+              <span>
+                Late
+              </span>
+
+              <strong id="summaryLate">
+                0
+              </strong>
+
+              <small id="summaryLatePercent">
+                0%
+              </small>
+            </article>
+
+
+            <article class="status-card excused-card">
+              <span>
+                Excused
+              </span>
+
+              <strong id="summaryExcused">
+                0
+              </strong>
+
+              <small id="summaryExcusedPercent">
+                0%
+              </small>
+            </article>
+
+          </section>
+
+
+
+          <!-- SUBMISSION PROGRESS -->
+          <section class="panel">
+
+            <div class="panel-header">
+
+              <div>
+                <h3>
+                  Class Submission Progress
+                </h3>
+
+                <p id="submissionProgressText">
+                  0 of 0 classes submitted
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="progress-track">
+              <div
+                id="submissionProgressBar"
+                class="progress-fill"
+                style="width: 0%;"
+              ></div>
+            </div>
+
+          </section>
+
+
+
+          <!-- ADMIN TWO COLUMN AREA -->
+          <section class="admin-grid">
+
+            <!-- ATTENTION REQUIRED -->
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+                  <h3>
+                    Attention Required
+                  </h3>
+
+                  <p>
+                    Items that may require follow-up.
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div
+                id="attentionList"
+                class="attention-list"
+              >
+
+                <div class="empty-state">
+                  No items to display.
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ATTENDANCE DISTRIBUTION -->
+            <div class="panel">
+
+              <div class="panel-header">
+
+                <div>
+                  <h3>
+                    Attendance Distribution
+                  </h3>
+
+                  <p>
+                    Recorded attendance for the selected day.
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="distribution-list">
+
+                <div class="distribution-row">
+
+                  <div class="distribution-label-row">
+                    <span>Present</span>
+                    <span id="distributionPresentText">
+                      0%
+                    </span>
+                  </div>
+
+                  <div class="mini-progress">
+                    <div
+                      id="distributionPresentBar"
+                      class="mini-progress-fill"
+                      style="width: 0%;"
+                    ></div>
+                  </div>
+
+                </div>
+
+
+                <div class="distribution-row">
+
+                  <div class="distribution-label-row">
+                    <span>Absent</span>
+                    <span id="distributionAbsentText">
+                      0%
+                    </span>
+                  </div>
+
+                  <div class="mini-progress">
+                    <div
+                      id="distributionAbsentBar"
+                      class="mini-progress-fill"
+                      style="width: 0%;"
+                    ></div>
+                  </div>
+
+                </div>
+
+
+                <div class="distribution-row">
+
+                  <div class="distribution-label-row">
+                    <span>Late</span>
+                    <span id="distributionLateText">
+                      0%
+                    </span>
+                  </div>
+
+                  <div class="mini-progress">
+                    <div
+                      id="distributionLateBar"
+                      class="mini-progress-fill"
+                      style="width: 0%;"
+                    ></div>
+                  </div>
+
+                </div>
+
+
+                <div class="distribution-row">
+
+                  <div class="distribution-label-row">
+                    <span>Excused</span>
+                    <span id="distributionExcusedText">
+                      0%
+                    </span>
+                  </div>
+
+                  <div class="mini-progress">
+                    <div
+                      id="distributionExcusedBar"
+                      class="mini-progress-fill"
+                      style="width: 0%;"
+                    ></div>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- CLASS MONITOR -->
+          <section class="panel">
+
+            <div class="panel-header">
+
+              <div>
+                <h3>
+                  Class Monitor
+                </h3>
+
+                <p>
+                  Click a class to view detailed attendance.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+              <table class="data-table">
+
+                <thead>
+                  <tr>
+                    <th>Class</th>
+                    <th>Enrolled</th>
+                    <th>Recorded</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Late</th>
+                    <th>Excused</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+
+                <tbody id="classMonitorBody">
+
+                  <tr>
+                    <td
+                      colspan="8"
+                      class="table-empty"
+                    >
+                      No class data loaded.
+                    </td>
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+
+
+          <!-- STUDENT SEARCH -->
+          <section class="panel">
+
+            <div class="panel-header search-panel-header">
+
+              <div>
+                <h3>
+                  Student Search
+                </h3>
+
+                <p>
+                  Search for a student profile
+                  and attendance history.
+                </p>
+              </div>
+
+
+              <div class="search-controls">
+
+                <input
+                  type="search"
+                  id="studentSearchInput"
+                  class="form-input compact-input"
+                  placeholder="Search student name or ID"
+                />
+
+                <button
+                  id="studentSearchButton"
+                  class="primary-button"
+                  type="button"
+                >
+                  Search
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div
+              id="studentSearchResults"
+              class="search-results"
+            >
+            </div>
+
+          </section>
+
+
+
+          <!-- ABSENTEE REPORT -->
+          <section class="panel">
+
+            <div class="panel-header">
+
+              <div>
+                <h3>
+                  Absentee Report
+                </h3>
+
+                <p>
+                  View or print students marked absent.
+                </p>
+              </div>
+
+
+              <button
+                id="printAbsentReportButton"
+                class="secondary-button"
+                type="button"
+              >
+                Print Report
+              </button>
+
+            </div>
+
+
+            <div
+              id="absenteeReportArea"
+              class="absentee-report-area"
+            >
+
+              <div class="empty-state">
+                Select a date to load absentee data.
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </main>
+
+
+
+      <!-- ===========================
+           TEACHER VIEW
+      ============================ -->
+      <main
+        id="teacherView"
+        class="dashboard-view hidden"
+      >
+
+        <div class="page-container">
+
+          <!-- TEACHER HEADER -->
+          <div class="page-heading-row">
+
+            <div>
+
+              <h2>
+                Daily Class Attendance
+              </h2>
+
+              <p id="teacherDateDisplay">
+                Today's attendance
+              </p>
+
+            </div>
+
+
+            <div class="teacher-status-box">
+
+              <span class="teacher-status-label">
+                Submission
+              </span>
+
+              <strong
+                id="teacherSubmissionStatus"
+                class="status-badge pending"
+              >
+                Pending
+              </strong>
+
+            </div>
+
+          </div>
+
+
+
+          <!-- TEACHER INFO -->
+          <section class="teacher-info-grid">
+
+            <article class="info-card">
+              <span>Teacher</span>
+              <strong id="teacherName">
+                -
+              </strong>
+            </article>
+
+
+            <article class="info-card">
+              <span>Class</span>
+              <strong id="teacherClassName">
+                -
+              </strong>
+            </article>
+
+
+            <article class="info-card">
+              <span>Students</span>
+              <strong id="teacherStudentCount">
+                0
+              </strong>
+            </article>
+
+
+            <article class="info-card">
+              <span>Last Update</span>
+              <strong id="teacherLastUpdated">
+                -
+              </strong>
+            </article>
+
+          </section>
+
+
+
+          <!-- LIVE COUNTS -->
+          <section class="teacher-count-grid">
+
+            <article class="status-card present-card">
+              <span>Present</span>
+              <strong id="teacherPresentCount">
+                0
+              </strong>
+            </article>
+
+
+            <article class="status-card absent-card">
+              <span>Absent</span>
+              <strong id="teacherAbsentCount">
+                0
+              </strong>
+            </article>
+
+
+            <article class="status-card late-card">
+              <span>Late</span>
+              <strong id="teacherLateCount">
+                0
+              </strong>
+            </article>
+
+
+            <article class="status-card excused-card">
+              <span>Excused</span>
+              <strong id="teacherExcusedCount">
+                0
+              </strong>
+            </article>
+
+          </section>
+
+
+
+          <!-- TEACHER ATTENDANCE TABLE -->
+          <section class="panel">
+
+            <div class="panel-header">
+
+              <div>
+                <h3>
+                  Student Attendance
+                </h3>
+
+                <p>
+                  Select each student's attendance status.
+                </p>
+              </div>
+
+
+              <button
+                id="markAllPresentButton"
+                class="secondary-button"
+                type="button"
+              >
+                Mark All Present
+              </button>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+              <table class="data-table teacher-table">
+
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Student Name</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+
+                <tbody id="teacherAttendanceBody">
+
+                  <tr>
+                    <td
+                      colspan="4"
+                      class="table-empty"
+                    >
+                      Loading students...
+                    </td>
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+
+            <div class="teacher-submit-row">
+
+              <div>
+                <p
+                  id="teacherSubmitMessage"
+                  class="form-message"
+                ></p>
+              </div>
+
+
+              <button
+                id="submitAttendanceButton"
+                class="primary-button"
+                type="button"
+              >
+                Submit Attendance
+              </button>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </main>
+
+    </section>
+
+
+
+    <!-- ========================================
+         STUDENT PROFILE MODAL
+    ========================================= -->
+    <div
+      id="studentProfileModal"
+      class="modal-overlay hidden"
+    >
+
+      <div class="modal-card large-modal">
+
+        <div class="modal-header">
+
+          <div>
+            <h3>
+              Student Attendance Profile
+            </h3>
+
+            <p id="profileStudentSubheading">
+              Attendance history
+            </p>
+          </div>
+
+
+          <button
+            id="closeStudentProfileModal"
+            class="modal-close-button"
+            type="button"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <div class="profile-header-grid">
+
+            <article class="info-card">
+              <span>Student</span>
+              <strong id="profileStudentName">
+                -
+              </strong>
+            </article>
+
+            <article class="info-card">
+              <span>Student ID</span>
+              <strong id="profileStudentId">
+                -
+              </strong>
+            </article>
+
+            <article class="info-card">
+              <span>Class</span>
+              <strong id="profileClassName">
+                -
+              </strong>
+            </article>
+
+            <article class="info-card">
+              <span>Attendance Rate</span>
+              <strong id="profileAttendanceRate">
+                0%
+              </strong>
+            </article>
+
+          </div>
+
+
+          <div class="profile-date-controls">
+
+            <div>
+              <label
+                for="profileStartDate"
+                class="field-label"
+              >
+                Start Date
+              </label>
+
+              <input
+                type="date"
+                id="profileStartDate"
+                class="date-input"
+              />
+            </div>
+
+
+            <div>
+              <label
+                for="profileEndDate"
+                class="field-label"
+              >
+                End Date
+              </label>
+
+              <input
+                type="date"
+                id="profileEndDate"
+                class="date-input"
+              />
+            </div>
+
+
+            <button
+              id="profileApplyDateButton"
+              class="primary-button"
+              type="button"
+            >
+              Apply
+            </button>
+
+          </div>
+
+
+          <section class="kpi-grid secondary-kpi-grid profile-summary-grid">
+
+            <article class="status-card present-card">
+              <span>Present</span>
+              <strong id="profilePresentCount">
+                0
+              </strong>
+            </article>
+
+            <article class="status-card absent-card">
+              <span>Absent</span>
+              <strong id="profileAbsentCount">
+                0
+              </strong>
+            </article>
+
+            <article class="status-card late-card">
+              <span>Late</span>
+              <strong id="profileLateCount">
+                0
+              </strong>
+            </article>
+
+            <article class="status-card excused-card">
+              <span>Excused</span>
+              <strong id="profileExcusedCount">
+                0
+              </strong>
+            </article>
+
+          </section>
+
+
+          <div class="table-wrapper">
+
+            <table class="data-table">
+
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+
+              <tbody id="studentHistoryBody">
+
+                <tr>
+                  <td
+                    colspan="3"
+                    class="table-empty"
+                  >
+                    No attendance history loaded.
+                  </td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ========================================
+         CLASS DETAIL MODAL
+    ========================================= -->
+    <div
+      id="classDetailModal"
+      class="modal-overlay hidden"
+    >
+
+      <div class="modal-card large-modal">
+
+        <div class="modal-header">
+
+          <div>
+            <h3 id="classDetailTitle">
+              Class Attendance
+            </h3>
+
+            <p id="classDetailDate">
+              -
+            </p>
+          </div>
+
+
+          <button
+            id="closeClassDetailModal"
+            class="modal-close-button"
+            type="button"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="modal-body">
+
+          <section class="kpi-grid secondary-kpi-grid profile-summary-grid">
+
+            <article class="status-card">
+              <span>Enrolled</span>
+              <strong id="classDetailEnrolled">
+                0
+              </strong>
+            </article>
+
+            <article class="status-card present-card">
+              <span>Present</span>
+              <strong id="classDetailPresent">
+                0
+              </strong>
+            </article>
+
+            <article class="status-card absent-card">
+              <span>Absent</span>
+              <strong id="classDetailAbsent">
+                0
+              </strong>
+            </article>
+
+            <article class="status-card late-card">
+              <span>Late</span>
+              <strong id="classDetailLate">
+                0
+              </strong>
+            </article>
+
+          </section>
+
+
+          <div class="table-wrapper">
+
+            <table class="data-table">
+
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Status</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+
+              <tbody id="classDetailBody">
+
+                <tr>
+                  <td
+                    colspan="3"
+                    class="table-empty"
+                  >
+                    No class data loaded.
+                  </td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ========================================
+         LOADING OVERLAY
+    ========================================= -->
+    <div
+      id="loadingOverlay"
+      class="loading-overlay hidden"
+    >
+
+      <div class="loading-card">
+
+        <div class="spinner"></div>
+
+        <p id="loadingText">
+          Loading...
+        </p>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- ========================================
+         TOAST
+    ========================================= -->
+    <div
+      id="toast"
+      class="toast hidden"
+    >
+    </div>
+
+  </div>
+
+
+
+  <!-- ========================================
+       JAVASCRIPT
+  ========================================= -->
+  <script src="app.js"></script>
+
+</body>
+</html>
