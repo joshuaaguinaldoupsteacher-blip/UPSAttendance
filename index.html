@@ -1231,6 +1231,95 @@
   <!-- ========================================
        JAVASCRIPT
   ========================================= -->
+
+  <script>
+    // ========================================
+    // CLASS MONITOR DISPLAY ORDER
+    // ========================================
+    const CLASS_MONITOR_ORDER = [
+      "KG1 Camel",
+      "KG2 Oryx",
+      "KG2 Falcon",
+      "1 Abu Dhabi",
+      "1 Al Ain",
+      "2 Umm Al Quwain",
+      "2 Ras Al Khaima",
+      "3 Sharjah",
+      "4 Fujaira",
+      "5 Dubai",
+      "6 Etihad",
+      "7 Marina",
+      "8 Hatta",
+      "9 Oasis",
+      "10 Jebel Hafeet",
+      "11 Jebel Jais",
+      "12 Jebel Ali"
+    ];
+
+    function normalizeClassName(value) {
+      return String(value || "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function sortClassMonitorRows() {
+      const tbody = document.getElementById("classMonitorBody");
+      if (!tbody) return;
+
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+
+      // Ignore the placeholder/empty row.
+      const classRows = rows.filter((row) => {
+        const firstCell = row.querySelector("td");
+        return firstCell && !firstCell.hasAttribute("colspan");
+      });
+
+      if (classRows.length === 0) return;
+
+      const orderMap = new Map(
+        CLASS_MONITOR_ORDER.map((className, index) => [
+          normalizeClassName(className),
+          index
+        ])
+      );
+
+      classRows.sort((a, b) => {
+        const aName = normalizeClassName(a.cells[0]?.textContent);
+        const bName = normalizeClassName(b.cells[0]?.textContent);
+
+        const aIndex = orderMap.has(aName)
+          ? orderMap.get(aName)
+          : Number.MAX_SAFE_INTEGER;
+
+        const bIndex = orderMap.has(bName)
+          ? orderMap.get(bName)
+          : Number.MAX_SAFE_INTEGER;
+
+        if (aIndex !== bIndex) return aIndex - bIndex;
+        return aName.localeCompare(bName);
+      });
+
+      classRows.forEach((row) => tbody.appendChild(row));
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const tbody = document.getElementById("classMonitorBody");
+      if (!tbody) return;
+
+      sortClassMonitorRows();
+
+      // Re-sort automatically whenever app.js refreshes the Class Monitor.
+      const observer = new MutationObserver(() => {
+        observer.disconnect();
+        sortClassMonitorRows();
+        observer.observe(tbody, { childList: true });
+      });
+
+      observer.observe(tbody, { childList: true });
+    });
+  </script>
+
   <script src="app.js"></script>
 
 </body>
