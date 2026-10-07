@@ -20,6 +20,11 @@ let currentClassCode = "";
 
 let teacherAttendanceData = [];
 
+/* ADMIN ATTENDANCE EDIT STATE */
+let adminAttendanceData = [];
+let adminAttendanceEditing = false;
+let currentClassDetailDate = "";
+
 
 /* =========================================
    DOM READY
@@ -207,6 +212,38 @@ function bindEvents() {
     ?.addEventListener(
       "click",
       closeClassDetail
+    );
+
+
+  /* ADMIN ATTENDANCE EDITING */
+
+  document
+    .getElementById(
+      "adminEditAttendanceButton"
+    )
+    ?.addEventListener(
+      "click",
+      enableAdminAttendanceEditing
+    );
+
+
+  document
+    .getElementById(
+      "adminCancelAttendanceEditButton"
+    )
+    ?.addEventListener(
+      "click",
+      cancelAdminAttendanceEditing
+    );
+
+
+  document
+    .getElementById(
+      "adminSaveAttendanceButton"
+    )
+    ?.addEventListener(
+      "click",
+      saveAdminAttendance
     );
 
 
@@ -2468,6 +2505,11 @@ async function loadClassDetails(
   currentClassCode =
     classCode;
 
+  currentClassDetailDate =
+    date || currentAdminDate || getDubaiDate();
+
+  adminAttendanceEditing = false;
+
 
   document
     .getElementById(
@@ -2548,6 +2590,13 @@ function renderClassDetails(
   );
 
 
+  currentClassDetailDate =
+    data.date ||
+    currentClassDetailDate ||
+    currentAdminDate ||
+    getDubaiDate();
+
+
   const summary =
     data.summary || {};
 
@@ -2576,18 +2625,54 @@ function renderClassDetails(
   );
 
 
+  adminAttendanceData =
+    (data.students || []).map(
+      student => ({
+        ...student,
+        status:
+          String(
+            student.status ||
+            "PRESENT"
+          )
+            .trim()
+            .toUpperCase(),
+
+        remarks:
+          student.remarks || ""
+      })
+    );
+
+
+  adminAttendanceEditing = false;
+
+  setAdminAttendanceEditMode(
+    false
+  );
+
+  renderAdminClassAttendanceRows();
+
+}
+
+
+/* =========================================
+   ADMIN CLASS ATTENDANCE ROWS
+========================================= */
+
+function renderAdminClassAttendanceRows() {
+
   const body =
     document.getElementById(
       "classDetailBody"
     );
 
 
-  const students =
-    data.students || [];
+  if (!body) {
+    return;
+  }
 
 
   if (
-    !students.length
+    !adminAttendanceData.length
   ) {
 
     body.innerHTML = `
@@ -2609,8 +2694,8 @@ function renderClassDetails(
   body.innerHTML = "";
 
 
-  students.forEach(
-    student => {
+  adminAttendanceData.forEach(
+    (student, index) => {
 
       const row =
         document.createElement(
@@ -2618,39 +2703,104 @@ function renderClassDetails(
         );
 
 
-      row.innerHTML = `
-        <td>
-
-          <button
-            type="button"
-            class="student-name-button"
-          >
-            ${escapeHtml(
-              student.studentName
-            )}
-          </button>
-
-        </td>
-
-        <td>
-          ${statusBadge(
-            student.status
-          )}
-        </td>
-
-        <td>
+      const studentButton = `
+        <button
+          type="button"
+          class="student-name-button"
+          data-student-id="${escapeAttribute(
+            student.studentId
+          )}"
+        >
           ${escapeHtml(
-            student.remarks || ""
+            student.studentName
           )}
-        </td>
+        </button>
       `;
+
+
+      if (
+        adminAttendanceEditing
+      ) {
+
+        const options = [
+          "PRESENT",
+          "ABSENT",
+          "LATE",
+          "EXCUSED"
+        ]
+          .map(
+            status => `
+              <option
+                value="${status}"
+                ${
+                  student.status === status
+                    ? "selected"
+                    : ""
+                }
+              >
+                ${capitalize(status)}
+              </option>
+            `
+          )
+          .join("");
+
+
+        row.innerHTML = `
+          <td>
+            ${studentButton}
+          </td>
+
+          <td>
+            <select
+              class="attendance-status admin-attendance-status"
+              data-index="${index}"
+            >
+              ${options}
+            </select>
+          </td>
+
+          <td>
+            <input
+              type="text"
+              class="attendance-remarks admin-attendance-remarks"
+              data-index="${index}"
+              value="${escapeAttribute(
+                student.remarks || ""
+              )}"
+              placeholder="Optional remarks"
+            />
+          </td>
+        `;
+
+      }
+      else {
+
+        row.innerHTML = `
+          <td>
+            ${studentButton}
+          </td>
+
+          <td>
+            ${statusBadge(
+              student.status
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              student.remarks || ""
+            )}
+          </td>
+        `;
+
+      }
 
 
       row
         .querySelector(
           ".student-name-button"
         )
-        .addEventListener(
+        ?.addEventListener(
           "click",
           () => {
 
@@ -2662,12 +2812,451 @@ function renderClassDetails(
         );
 
 
+      if (
+        adminAttendanceEditing
+      ) {
+
+        row
+          .querySelector(
+            ".admin-attendance-status"
+          )
+          ?.addEventListener(
+            "change",
+            event => {
+
+              adminAttendanceData[
+                index
+              ].status =
+                event.target.value;
+
+              updateAdminClassCounts();
+
+            }
+          );
+
+
+        row
+          .querySelector(
+            ".admin-attendance-remarks"
+          )
+          ?.addEventListener(
+            "input",
+            event => {
+
+              adminAttendanceData[
+                index
+              ].remarks =
+                event.target.value;
+
+            }
+          );
+
+      }
+
+
       body.appendChild(
         row
       );
 
     }
   );
+
+
+  updateAdminClassCounts();
+
+}
+
+
+/* =========================================
+   ADMIN ATTENDANCE EDIT MODE
+========================================= */
+
+function setAdminAttendanceEditMode(
+  editing
+) {
+
+  adminAttendanceEditing =
+    editing;
+
+
+  const editButton =
+    document.getElementById(
+      "adminEditAttendanceButton"
+    );
+
+
+  const saveButton =
+    document.getElementById(
+      "adminSaveAttendanceButton"
+    );
+
+
+  const cancelButton =
+    document.getElementById(
+      "adminCancelAttendanceEditButton"
+    );
+
+
+  const message =
+    document.getElementById(
+      "adminAttendanceEditMessage"
+    );
+
+
+  if (editButton) {
+    editButton.classList.toggle(
+      "hidden",
+      editing
+    );
+  }
+
+
+  if (saveButton) {
+    saveButton.classList.toggle(
+      "hidden",
+      !editing
+    );
+  }
+
+
+  if (cancelButton) {
+    cancelButton.classList.toggle(
+      "hidden",
+      !editing
+    );
+  }
+
+
+  if (message) {
+
+    message.textContent =
+      editing
+        ? "Administrator edit mode is active."
+        : "";
+
+  }
+
+}
+
+
+/* =========================================
+   ENABLE ADMIN ATTENDANCE EDITING
+========================================= */
+
+function enableAdminAttendanceEditing() {
+
+  if (
+    !currentUser ||
+    currentUser.role !== "ADMIN"
+  ) {
+
+    showToast(
+      "Administrator access required.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !adminAttendanceData.length
+  ) {
+
+    showToast(
+      "There are no students to edit.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  setAdminAttendanceEditMode(
+    true
+  );
+
+
+  renderAdminClassAttendanceRows();
+
+}
+
+
+/* =========================================
+   CANCEL ADMIN ATTENDANCE EDITING
+========================================= */
+
+async function cancelAdminAttendanceEditing() {
+
+  if (
+    !currentClassCode
+  ) {
+
+    setAdminAttendanceEditMode(
+      false
+    );
+
+    return;
+
+  }
+
+
+  setAdminAttendanceEditMode(
+    false
+  );
+
+
+  await loadClassDetails(
+    currentClassCode,
+    currentClassDetailDate ||
+    currentAdminDate
+  );
+
+}
+
+
+/* =========================================
+   ADMIN CLASS COUNTS
+========================================= */
+
+function updateAdminClassCounts() {
+
+  const counts = {
+    PRESENT: 0,
+    ABSENT: 0,
+    LATE: 0,
+    EXCUSED: 0
+  };
+
+
+  adminAttendanceData.forEach(
+    student => {
+
+      const status =
+        String(
+          student.status || ""
+        )
+          .trim()
+          .toUpperCase();
+
+
+      if (
+        counts[
+          status
+        ] !== undefined
+      ) {
+
+        counts[
+          status
+        ]++;
+
+      }
+
+    }
+  );
+
+
+  setText(
+    "classDetailPresent",
+    counts.PRESENT
+  );
+
+
+  setText(
+    "classDetailAbsent",
+    counts.ABSENT
+  );
+
+
+  setText(
+    "classDetailLate",
+    counts.LATE
+  );
+
+}
+
+
+/* =========================================
+   SAVE ADMIN ATTENDANCE
+========================================= */
+
+async function saveAdminAttendance() {
+
+  if (
+    !currentUser ||
+    currentUser.role !== "ADMIN"
+  ) {
+
+    showToast(
+      "Administrator access required.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !currentClassCode
+  ) {
+
+    showToast(
+      "No class is selected.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !adminAttendanceData.length
+  ) {
+
+    showToast(
+      "There are no students to save.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "adminSaveAttendanceButton"
+    );
+
+
+  const message =
+    document.getElementById(
+      "adminAttendanceEditMessage"
+    );
+
+
+  if (button) {
+
+    button.disabled = true;
+    button.textContent =
+      "Saving...";
+
+  }
+
+
+  if (message) {
+
+    message.textContent = "";
+
+  }
+
+
+  try {
+
+    const attendance =
+      adminAttendanceData.map(
+        student => ({
+          studentId:
+            student.studentId,
+
+          status:
+            student.status,
+
+          remarks:
+            student.remarks || ""
+        })
+      );
+
+
+    const result =
+      await apiRequest({
+        action:
+          "admin-submit-attendance",
+
+        email:
+          currentEmail,
+
+        classCode:
+          currentClassCode,
+
+        date:
+          currentClassDetailDate ||
+          currentAdminDate ||
+          getDubaiDate(),
+
+        attendance
+      });
+
+
+    if (message) {
+
+      message.style.color =
+        "var(--success)";
+
+      message.textContent =
+        result.message ||
+        "Attendance saved by administrator.";
+
+    }
+
+
+    showToast(
+      result.message ||
+      "Attendance saved by administrator."
+    );
+
+
+    setAdminAttendanceEditMode(
+      false
+    );
+
+
+    await loadAdminDashboard(
+      currentAdminDate
+    );
+
+
+    await loadClassDetails(
+      currentClassCode,
+      currentClassDetailDate ||
+      currentAdminDate
+    );
+
+  }
+  catch (error) {
+
+    if (message) {
+
+      message.style.color =
+        "var(--danger)";
+
+      message.textContent =
+        error.message;
+
+    }
+
+
+    showToast(
+      error.message,
+      true
+    );
+
+  }
+  finally {
+
+    if (button) {
+
+      button.disabled = false;
+      button.textContent =
+        "Save Attendance";
+
+    }
+
+  }
 
 }
 
@@ -2689,6 +3278,18 @@ function closeClassDetail() {
 
   currentClassCode =
     "";
+
+  currentClassDetailDate =
+    "";
+
+  adminAttendanceData = [];
+
+  adminAttendanceEditing =
+    false;
+
+  setAdminAttendanceEditMode(
+    false
+  );
 
 }
 
