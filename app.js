@@ -20,20 +20,28 @@ let currentClassCode = "";
 
 let teacherAttendanceData = [];
 
-/* ADMIN ATTENDANCE EDIT STATE */
-let adminAttendanceData = [];
-let adminAttendanceEditing = false;
-let currentClassDetailDate = "";
+let adminReportData = null;
+let teacherReportData = null;
+
+let adminClasses = [];
 
 
 /* =========================================
    DOM READY
 ========================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-  bindEvents();
-  restoreSession();
-});
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    bindEvents();
+
+    initializeReportDates();
+
+    restoreSession();
+
+  }
+);
 
 
 /* =========================================
@@ -43,83 +51,118 @@ document.addEventListener("DOMContentLoaded", () => {
 function bindEvents() {
 
   const loginButton =
-    document.getElementById("loginButton");
+    document.getElementById(
+      "loginButton"
+    );
 
   const loginEmail =
-    document.getElementById("loginEmail");
+    document.getElementById(
+      "loginEmail"
+    );
 
   const logoutButton =
-    document.getElementById("logoutButton");
+    document.getElementById(
+      "logoutButton"
+    );
 
 
   if (loginButton) {
+
     loginButton.addEventListener(
       "click",
       loginUser
     );
+
   }
 
 
   if (loginEmail) {
+
     loginEmail.addEventListener(
       "keydown",
       event => {
-        if (event.key === "Enter") {
+
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
           loginUser();
+
         }
+
       }
     );
+
   }
 
 
   if (logoutButton) {
+
     logoutButton.addEventListener(
       "click",
       logoutUser
     );
+
   }
 
 
-  /* ADMIN DATE CONTROLS */
+  /* =====================================
+     ADMIN DATE CONTROLS
+  ====================================== */
 
   document
-    .getElementById("adminPreviousDate")
+    .getElementById(
+      "adminPreviousDate"
+    )
     ?.addEventListener(
       "click",
-      () => changeAdminDate(-1)
+      () =>
+        changeAdminDate(-1)
     );
 
 
   document
-    .getElementById("adminNextDate")
+    .getElementById(
+      "adminNextDate"
+    )
     ?.addEventListener(
       "click",
-      () => changeAdminDate(1)
+      () =>
+        changeAdminDate(1)
     );
 
 
   document
-    .getElementById("adminTodayButton")
+    .getElementById(
+      "adminTodayButton"
+    )
     ?.addEventListener(
       "click",
       () => {
+
         currentAdminDate =
           getDubaiDate();
+
 
         document.getElementById(
           "adminDateInput"
         ).value =
           currentAdminDate;
 
+
         loadAdminDashboard(
           currentAdminDate
         );
+
       }
     );
 
 
   document
-    .getElementById("adminDateInput")
+    .getElementById(
+      "adminDateInput"
+    )
     ?.addEventListener(
       "change",
       event => {
@@ -127,6 +170,7 @@ function bindEvents() {
         currentAdminDate =
           event.target.value;
 
+
         loadAdminDashboard(
           currentAdminDate
         );
@@ -135,10 +179,14 @@ function bindEvents() {
     );
 
 
-  /* SEARCH */
+  /* =====================================
+     STUDENT SEARCH
+  ====================================== */
 
   document
-    .getElementById("studentSearchButton")
+    .getElementById(
+      "studentSearchButton"
+    )
     ?.addEventListener(
       "click",
       searchStudents
@@ -146,20 +194,29 @@ function bindEvents() {
 
 
   document
-    .getElementById("studentSearchInput")
+    .getElementById(
+      "studentSearchInput"
+    )
     ?.addEventListener(
       "keydown",
       event => {
 
-        if (event.key === "Enter") {
+        if (
+          event.key ===
+          "Enter"
+        ) {
+
           searchStudents();
+
         }
 
       }
     );
 
 
-  /* ABSENTEE REPORT */
+  /* =====================================
+     ABSENTEE REPORT
+  ====================================== */
 
   document
     .getElementById(
@@ -171,7 +228,9 @@ function bindEvents() {
     );
 
 
-  /* TEACHER */
+  /* =====================================
+     TEACHER ATTENDANCE
+  ====================================== */
 
   document
     .getElementById(
@@ -193,7 +252,63 @@ function bindEvents() {
     );
 
 
-  /* MODALS */
+  /* =====================================
+     ADMIN ATTENDANCE REPORT
+  ====================================== */
+
+  document
+    .getElementById(
+      "adminGenerateReportButton"
+    )
+    ?.addEventListener(
+      "click",
+      generateAdminAttendanceReport
+    );
+
+
+  document
+    .getElementById(
+      "adminPrintReportButton"
+    )
+    ?.addEventListener(
+      "click",
+      () =>
+        printAttendanceReport(
+          "ADMIN"
+        )
+    );
+
+
+  /* =====================================
+     TEACHER ATTENDANCE REPORT
+  ====================================== */
+
+  document
+    .getElementById(
+      "teacherGenerateReportButton"
+    )
+    ?.addEventListener(
+      "click",
+      generateTeacherAttendanceReport
+    );
+
+
+  document
+    .getElementById(
+      "teacherPrintReportButton"
+    )
+    ?.addEventListener(
+      "click",
+      () =>
+        printAttendanceReport(
+          "TEACHER"
+        )
+    );
+
+
+  /* =====================================
+     MODALS
+  ====================================== */
 
   document
     .getElementById(
@@ -212,38 +327,6 @@ function bindEvents() {
     ?.addEventListener(
       "click",
       closeClassDetail
-    );
-
-
-  /* ADMIN ATTENDANCE EDITING */
-
-  document
-    .getElementById(
-      "adminEditAttendanceButton"
-    )
-    ?.addEventListener(
-      "click",
-      enableAdminAttendanceEditing
-    );
-
-
-  document
-    .getElementById(
-      "adminCancelAttendanceEditButton"
-    )
-    ?.addEventListener(
-      "click",
-      cancelAdminAttendanceEditing
-    );
-
-
-  document
-    .getElementById(
-      "adminSaveAttendanceButton"
-    )
-    ?.addEventListener(
-      "click",
-      saveAdminAttendance
     );
 
 
@@ -268,8 +351,6 @@ function bindEvents() {
       }
     );
 
-
-  /* CLICK OUTSIDE MODAL */
 
   document
     .getElementById(
@@ -319,26 +400,36 @@ function bindEvents() {
    API HELPER
 ========================================= */
 
-async function apiRequest(payload) {
+async function apiRequest(
+  payload
+) {
 
   const response =
     await fetch(
       API_URL,
       {
-        method: "POST",
+
+        method:
+          "POST",
 
         headers: {
+
           "Content-Type":
             "application/json"
+
         },
 
         body:
-          JSON.stringify(payload)
+          JSON.stringify(
+            payload
+          )
+
       }
     );
 
 
   let data;
+
 
   try {
 
@@ -355,7 +446,9 @@ async function apiRequest(payload) {
   }
 
 
-  if (!response.ok) {
+  if (
+    !response.ok
+  ) {
 
     throw new Error(
       data.message ||
@@ -412,7 +505,8 @@ async function loginUser() {
       .toLowerCase();
 
 
-  message.textContent = "";
+  message.textContent =
+    "";
 
 
   if (!email) {
@@ -426,7 +520,9 @@ async function loginUser() {
 
 
   if (
-    !isValidEmail(email)
+    !isValidEmail(
+      email
+    )
   ) {
 
     message.textContent =
@@ -437,7 +533,10 @@ async function loginUser() {
   }
 
 
-  button.disabled = true;
+  button.disabled =
+    true;
+
+
   button.textContent =
     "Checking...";
 
@@ -446,8 +545,12 @@ async function loginUser() {
 
     const result =
       await apiRequest({
-        action: "login",
+
+        action:
+          "login",
+
         email
+
       });
 
 
@@ -464,7 +567,10 @@ async function loginUser() {
     }
 
 
-    currentUser = result;
+    currentUser =
+      result;
+
+
     currentEmail =
       result.email;
 
@@ -486,7 +592,10 @@ async function loginUser() {
   }
   finally {
 
-    button.disabled = false;
+    button.disabled =
+      false;
+
+
     button.textContent =
       "Continue";
 
@@ -521,8 +630,13 @@ async function restoreSession() {
 
     const result =
       await apiRequest({
-        action: "login",
-        email: savedEmail
+
+        action:
+          "login",
+
+        email:
+          savedEmail
+
       });
 
 
@@ -539,7 +653,10 @@ async function restoreSession() {
     }
 
 
-    currentUser = result;
+    currentUser =
+      result;
+
+
     currentEmail =
       result.email;
 
@@ -549,7 +666,10 @@ async function restoreSession() {
   }
   catch (error) {
 
-    console.error(error);
+    console.error(
+      error
+    );
+
 
     sessionStorage.removeItem(
       "upsAttendanceEmail"
@@ -572,40 +692,52 @@ async function restoreSession() {
 async function openApplication() {
 
   document
-    .getElementById("loginView")
+    .getElementById(
+      "loginView"
+    )
     .classList.remove(
       "active-view"
     );
 
 
   document
-    .getElementById("mainView")
+    .getElementById(
+      "mainView"
+    )
     .classList.add(
       "active-view"
     );
 
 
-  document.getElementById(
-    "headerUserName"
-  ).textContent =
+  setText(
+    "headerUserName",
     currentUser.name ||
-    currentUser.email;
+    currentUser.email
+  );
 
 
-  document.getElementById(
-    "headerUserRole"
-  ).textContent =
-    currentUser.role;
-
-
-  document
-    .getElementById("adminView")
-    .classList.add("hidden");
+  setText(
+    "headerUserRole",
+    currentUser.role
+  );
 
 
   document
-    .getElementById("teacherView")
-    .classList.add("hidden");
+    .getElementById(
+      "adminView"
+    )
+    .classList.add(
+      "hidden"
+    );
+
+
+  document
+    .getElementById(
+      "teacherView"
+    )
+    .classList.add(
+      "hidden"
+    );
 
 
   if (
@@ -677,7 +809,14 @@ function logoutUser() {
 
 
   currentUser = null;
+
   currentEmail = "";
+
+  teacherAttendanceData = [];
+
+  adminReportData = null;
+
+  teacherReportData = null;
 
 
   document
@@ -700,12 +839,14 @@ function logoutUser() {
 
   document.getElementById(
     "loginEmail"
-  ).value = "";
+  ).value =
+    "";
 
 
   document.getElementById(
     "loginMessage"
-  ).textContent = "";
+  ).textContent =
+    "";
 
 }
 
@@ -727,6 +868,7 @@ async function loadAdminDashboard(
 
     const data =
       await apiRequest({
+
         action:
           "get-admin-dashboard",
 
@@ -734,11 +876,13 @@ async function loadAdminDashboard(
           currentEmail,
 
         date
+
       });
 
 
     if (
-      data.authorized === false
+      data.authorized ===
+      false
     ) {
 
       throw new Error(
@@ -765,12 +909,19 @@ async function loadAdminDashboard(
 
 
     renderClassMonitor(
-      data.classes || []
+      data.classes ||
+      []
     );
 
 
     renderAttentionList(
       data
+    );
+
+
+    populateAdminReportClassDropdown(
+      data.classes ||
+      []
     );
 
 
@@ -805,12 +956,14 @@ function renderAdminSummary(
 ) {
 
   const summary =
-    data.summary || {};
+    data.summary ||
+    {};
 
 
   setText(
     "kpiTotalClasses",
-    summary.totalClasses || 0
+    summary.totalClasses ||
+    0
   );
 
 
@@ -822,7 +975,8 @@ function renderAdminSummary(
 
   setText(
     "kpiRecordedStudents",
-    summary.recordedStudents || 0
+    summary.recordedStudents ||
+    0
   );
 
 
@@ -834,7 +988,8 @@ function renderAdminSummary(
 
   setText(
     "summaryPresent",
-    summary.present || 0
+    summary.present ||
+    0
   );
 
 
@@ -846,7 +1001,8 @@ function renderAdminSummary(
 
   setText(
     "summaryAbsent",
-    summary.absent || 0
+    summary.absent ||
+    0
   );
 
 
@@ -858,7 +1014,8 @@ function renderAdminSummary(
 
   setText(
     "summaryLate",
-    summary.late || 0
+    summary.late ||
+    0
   );
 
 
@@ -870,7 +1027,8 @@ function renderAdminSummary(
 
   setText(
     "summaryExcused",
-    summary.excused || 0
+    summary.excused ||
+    0
   );
 
 
@@ -886,10 +1044,10 @@ function renderAdminSummary(
   );
 
 
-  document.getElementById(
-    "submissionProgressBar"
-  ).style.width =
-    `${summary.submissionPercentage || 0}%`;
+  setWidth(
+    "submissionProgressBar",
+    summary.submissionPercentage
+  );
 
 
   setText(
@@ -956,10 +1114,13 @@ function renderClassMonitor(
     );
 
 
-  body.innerHTML = "";
+  body.innerHTML =
+    "";
 
 
-  if (!classes.length) {
+  if (
+    !classes.length
+  ) {
 
     body.innerHTML = `
       <tr>
@@ -1046,7 +1207,9 @@ function renderClassMonitor(
       );
 
 
-      body.appendChild(row);
+      body.appendChild(
+        row
+      );
 
     }
   );
@@ -1069,73 +1232,88 @@ function renderAttentionList(
 
 
   const summary =
-    data.summary || {};
+    data.summary ||
+    {};
 
 
   const items = [];
 
 
   if (
-    summary.pending > 0
+    summary.pending >
+    0
   ) {
 
     items.push({
+
       title:
         "Pending Class Submissions",
 
       value:
         `${summary.pending} class${summary.pending === 1 ? "" : "es"}`
+
     });
 
   }
 
 
   if (
-    summary.absent > 0
+    summary.absent >
+    0
   ) {
 
     items.push({
+
       title:
         "Absent Students",
 
       value:
         `${summary.absent} student${summary.absent === 1 ? "" : "s"}`
+
     });
 
   }
 
 
   if (
-    summary.late > 0
+    summary.late >
+    0
   ) {
 
     items.push({
+
       title:
         "Late Students",
 
       value:
         `${summary.late} student${summary.late === 1 ? "" : "s"}`
+
     });
 
   }
 
 
   if (
-    summary.excused > 0
+    summary.excused >
+    0
   ) {
 
     items.push({
+
       title:
         "Excused Students",
 
       value:
         `${summary.excused} student${summary.excused === 1 ? "" : "s"}`
+
     });
 
   }
 
 
-  if (!items.length) {
+  if (
+    !items.length
+  ) {
 
     container.innerHTML = `
       <div class="empty-state">
@@ -1182,7 +1360,9 @@ function changeAdminDate(
   numberOfDays
 ) {
 
-  if (!currentAdminDate) {
+  if (
+    !currentAdminDate
+  ) {
 
     currentAdminDate =
       getDubaiDate();
@@ -1203,7 +1383,9 @@ function changeAdminDate(
 
 
   currentAdminDate =
-    formatDateOnly(date);
+    formatDateOnly(
+      date
+    );
 
 
   document.getElementById(
@@ -1231,6 +1413,7 @@ async function loadAbsentStudents(
 
     const data =
       await apiRequest({
+
         action:
           "get-absent-students",
 
@@ -1238,6 +1421,7 @@ async function loadAbsentStudents(
           currentEmail,
 
         date
+
       });
 
 
@@ -1278,19 +1462,25 @@ function renderAbsentReport(
 
 
   const students =
-    data.students || [];
+    data.students ||
+    [];
 
 
-  if (!students.length) {
+  if (
+    !students.length
+  ) {
 
     area.innerHTML = `
       <div class="empty-state">
+
         No absent students recorded for
+
         ${escapeHtml(
           data.displayDate ||
           data.date ||
           ""
         )}.
+
       </div>
     `;
 
@@ -1302,7 +1492,10 @@ function renderAbsentReport(
   const rows =
     students
       .map(
-        (student, index) => `
+        (
+          student,
+          index
+        ) => `
           <tr>
 
             <td>
@@ -1324,7 +1517,8 @@ function renderAbsentReport(
 
             <td>
               ${escapeHtml(
-                student.remarks || ""
+                student.remarks ||
+                ""
               )}
             </td>
 
@@ -1356,16 +1550,25 @@ function renderAbsentReport(
       <table class="data-table">
 
         <thead>
+
           <tr>
+
             <th>#</th>
+
             <th>Student</th>
+
             <th>Class</th>
+
             <th>Remarks</th>
+
           </tr>
+
         </thead>
 
         <tbody>
+
           ${rows}
+
         </tbody>
 
       </table>
@@ -1395,7 +1598,9 @@ function printAbsentReport() {
     );
 
 
-  if (!printWindow) {
+  if (
+    !printWindow
+  ) {
 
     showToast(
       "Please allow pop-ups to print the report.",
@@ -1409,7 +1614,9 @@ function printAbsentReport() {
 
   printWindow.document.write(`
     <!DOCTYPE html>
+
     <html>
+
     <head>
 
       <title>
@@ -1423,39 +1630,53 @@ function printAbsentReport() {
             Arial,
             sans-serif;
 
-          padding: 30px;
+          padding:
+            30px;
 
-          color: #222;
+          color:
+            #222;
         }
 
         h3 {
-          margin-bottom: 5px;
+          margin-bottom:
+            5px;
         }
 
         p {
-          color: #666;
+          color:
+            #666;
         }
 
         table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 20px;
+          width:
+            100%;
+
+          border-collapse:
+            collapse;
+
+          margin-top:
+            20px;
         }
 
         th,
         td {
           border:
-            1px solid #ccc;
+            1px solid
+            #ccc;
 
-          padding: 8px;
+          padding:
+            8px;
 
-          text-align: left;
+          text-align:
+            left;
 
-          font-size: 12px;
+          font-size:
+            12px;
         }
 
         th {
-          background: #f2f2f2;
+          background:
+            #f2f2f2;
         }
 
       </style>
@@ -1467,12 +1688,12 @@ function printAbsentReport() {
       ${content}
 
     </body>
+
     </html>
   `);
 
 
   printWindow.document.close();
-
 
   printWindow.focus();
 
@@ -1504,16 +1725,19 @@ async function loadTeacherAttendance() {
 
     const data =
       await apiRequest({
+
         action:
           "get-teacher-attendance",
 
         email:
           currentEmail
+
       });
 
 
     if (
-      data.authorized === false
+      data.authorized ===
+      false
     ) {
 
       throw new Error(
@@ -1525,7 +1749,8 @@ async function loadTeacherAttendance() {
 
 
     teacherAttendanceData =
-      data.students || [];
+      data.students ||
+      [];
 
 
     setText(
@@ -1578,8 +1803,10 @@ async function loadTeacherAttendance() {
       statusElement.textContent =
         "Submitted";
 
+
       statusElement.className =
         "status-badge submitted";
+
 
       document.getElementById(
         "submitAttendanceButton"
@@ -1592,8 +1819,10 @@ async function loadTeacherAttendance() {
       statusElement.textContent =
         "Pending";
 
+
       statusElement.className =
         "status-badge pending";
+
 
       document.getElementById(
         "submitAttendanceButton"
@@ -1635,7 +1864,8 @@ function renderTeacherAttendance() {
     );
 
 
-  body.innerHTML = "";
+  body.innerHTML =
+    "";
 
 
   if (
@@ -1644,6 +1874,7 @@ function renderTeacherAttendance() {
 
     body.innerHTML = `
       <tr>
+
         <td
           colspan="4"
           class="table-empty"
@@ -1651,8 +1882,10 @@ function renderTeacherAttendance() {
           No active students found
           for this class.
         </td>
+
       </tr>
     `;
+
 
     updateTeacherCounts();
 
@@ -1662,7 +1895,10 @@ function renderTeacherAttendance() {
 
 
   teacherAttendanceData.forEach(
-    (student, index) => {
+    (
+      student,
+      index
+    ) => {
 
       const row =
         document.createElement(
@@ -1671,10 +1907,12 @@ function renderTeacherAttendance() {
 
 
       const options = [
+
         "PRESENT",
         "ABSENT",
         "LATE",
         "EXCUSED"
+
       ]
         .map(
           status => `
@@ -1687,7 +1925,9 @@ function renderTeacherAttendance() {
                   : ""
               }
             >
-              ${capitalize(status)}
+              ${capitalize(
+                status
+              )}
             </option>
           `
         )
@@ -1730,75 +1970,72 @@ function renderTeacherAttendance() {
             class="attendance-remarks"
             data-index="${index}"
             value="${escapeAttribute(
-              student.remarks || ""
+              student.remarks ||
+              ""
             )}"
             placeholder="Optional remarks"
-          />
+          >
 
         </td>
       `;
 
 
-      const nameButton =
-        row.querySelector(
+      row
+        .querySelector(
           ".student-name-button"
+        )
+        .addEventListener(
+          "click",
+          () => {
+
+            openStudentProfile(
+              student.studentId
+            );
+
+          }
         );
 
 
-      nameButton.addEventListener(
-        "click",
-        () => {
-
-          openStudentProfile(
-            student.studentId
-          );
-
-        }
-      );
-
-
-      const select =
-        row.querySelector(
+      row
+        .querySelector(
           ".attendance-status"
+        )
+        .addEventListener(
+          "change",
+          event => {
+
+            teacherAttendanceData[
+              index
+            ].status =
+              event.target.value;
+
+
+            updateTeacherCounts();
+
+          }
         );
 
 
-      select.addEventListener(
-        "change",
-        event => {
-
-          teacherAttendanceData[
-            index
-          ].status =
-            event.target.value;
-
-
-          updateTeacherCounts();
-
-        }
-      );
-
-
-      const remarks =
-        row.querySelector(
+      row
+        .querySelector(
           ".attendance-remarks"
+        )
+        .addEventListener(
+          "input",
+          event => {
+
+            teacherAttendanceData[
+              index
+            ].remarks =
+              event.target.value;
+
+          }
         );
 
 
-      remarks.addEventListener(
-        "input",
-        event => {
-
-          teacherAttendanceData[
-            index
-          ].remarks =
-            event.target.value;
-
-        }
+      body.appendChild(
+        row
       );
-
-
-      body.appendChild(row);
 
     }
   );
@@ -1816,10 +2053,15 @@ function renderTeacherAttendance() {
 function updateTeacherCounts() {
 
   const counts = {
+
     PRESENT: 0,
+
     ABSENT: 0,
+
     LATE: 0,
+
     EXCUSED: 0
+
   };
 
 
@@ -1878,9 +2120,12 @@ function markAllPresent() {
   teacherAttendanceData =
     teacherAttendanceData.map(
       student => ({
+
         ...student,
+
         status:
           "PRESENT"
+
       })
     );
 
@@ -1927,12 +2172,16 @@ async function submitAttendance() {
     );
 
 
-  button.disabled = true;
+  button.disabled =
+    true;
+
+
   button.textContent =
     "Saving...";
 
 
-  message.textContent = "";
+  message.textContent =
+    "";
 
 
   try {
@@ -1940,6 +2189,7 @@ async function submitAttendance() {
     const attendance =
       teacherAttendanceData.map(
         student => ({
+
           studentId:
             student.studentId,
 
@@ -1947,13 +2197,16 @@ async function submitAttendance() {
             student.status,
 
           remarks:
-            student.remarks || ""
+            student.remarks ||
+            ""
+
         })
       );
 
 
     const result =
       await apiRequest({
+
         action:
           "submit-attendance",
 
@@ -1961,6 +2214,7 @@ async function submitAttendance() {
           currentEmail,
 
         attendance
+
       });
 
 
@@ -2000,9 +2254,1708 @@ async function submitAttendance() {
   }
   finally {
 
-    button.disabled = false;
+    button.disabled =
+      false;
 
   }
+
+}
+
+
+/* =========================================
+   ADMIN REPORT CLASS DROPDOWN
+========================================= */
+
+function populateAdminReportClassDropdown(
+  classes
+) {
+
+  adminClasses =
+    classes ||
+    [];
+
+
+  const select =
+    document.getElementById(
+      "adminReportClass"
+    );
+
+
+  if (!select) {
+    return;
+  }
+
+
+  const previousValue =
+    select.value ||
+    "ALL";
+
+
+  select.innerHTML = `
+    <option value="ALL">
+      All Classes
+    </option>
+  `;
+
+
+  adminClasses.forEach(
+    item => {
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+
+      option.value =
+        item.classCode;
+
+
+      option.textContent =
+        item.className ||
+        item.classCode;
+
+
+      select.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  if (
+    Array.from(
+      select.options
+    ).some(
+      option =>
+        option.value ===
+        previousValue
+    )
+  ) {
+
+    select.value =
+      previousValue;
+
+  }
+
+}
+
+
+/* =========================================
+   INITIALIZE REPORT DATES
+========================================= */
+
+function initializeReportDates() {
+
+  const today =
+    getDubaiDate();
+
+
+  const currentDate =
+    parseDateOnly(
+      today
+    );
+
+
+  const firstDay =
+    new Date(
+
+      currentDate.getFullYear(),
+
+      currentDate.getMonth(),
+
+      1
+
+    );
+
+
+  const firstDayString =
+    formatDateOnly(
+      firstDay
+    );
+
+
+  setDateInput(
+    "adminReportStartDate",
+    firstDayString
+  );
+
+
+  setDateInput(
+    "adminReportEndDate",
+    today
+  );
+
+
+  setDateInput(
+    "teacherReportStartDate",
+    firstDayString
+  );
+
+
+  setDateInput(
+    "teacherReportEndDate",
+    today
+  );
+
+}
+
+
+/* =========================================
+   ADMIN ATTENDANCE REPORT
+========================================= */
+
+async function generateAdminAttendanceReport() {
+
+  const startDate =
+    document.getElementById(
+      "adminReportStartDate"
+    ).value;
+
+
+  const endDate =
+    document.getElementById(
+      "adminReportEndDate"
+    ).value;
+
+
+  const classCode =
+    document.getElementById(
+      "adminReportClass"
+    ).value ||
+    "ALL";
+
+
+  const message =
+    document.getElementById(
+      "adminReportMessage"
+    );
+
+
+  const button =
+    document.getElementById(
+      "adminGenerateReportButton"
+    );
+
+
+  message.textContent =
+    "";
+
+
+  if (
+    !validateReportDates(
+      startDate,
+      endDate,
+      message
+    )
+  ) {
+    return;
+  }
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Generating...";
+
+
+  showLoading(
+    "Generating attendance report..."
+  );
+
+
+  try {
+
+    const data =
+      await apiRequest({
+
+        action:
+          "get-attendance-report",
+
+        email:
+          currentEmail,
+
+        startDate,
+
+        endDate,
+
+        classCode
+
+      });
+
+
+    adminReportData =
+      data;
+
+
+    renderAdminAttendanceReport(
+      data
+    );
+
+
+    document.getElementById(
+      "adminPrintReportButton"
+    ).disabled =
+      false;
+
+
+    showToast(
+      "Attendance report generated."
+    );
+
+  }
+  catch (error) {
+
+    adminReportData =
+      null;
+
+
+    document.getElementById(
+      "adminPrintReportButton"
+    ).disabled =
+      true;
+
+
+    message.textContent =
+      error.message;
+
+
+    showToast(
+      error.message,
+      true
+    );
+
+  }
+  finally {
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Generate Report";
+
+
+    hideLoading();
+
+  }
+
+}
+
+
+/* =========================================
+   RENDER ADMIN ATTENDANCE REPORT
+========================================= */
+
+function renderAdminAttendanceReport(
+  data
+) {
+
+  const summary =
+    data.summary ||
+    {};
+
+
+  document.getElementById(
+    "adminReportHeader"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "adminReportSummary"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "adminReportStatusSummary"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "adminReportClassSummaryArea"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "adminReportStudentArea"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  setText(
+    "adminReportTitle",
+    `${data.scope?.className || "Attendance"} Report`
+  );
+
+
+  setText(
+    "adminReportPeriod",
+    `${data.range?.startDisplay || data.range?.startDate || ""} to ${data.range?.endDisplay || data.range?.endDate || ""}`
+  );
+
+
+  setText(
+    "adminReportStudents",
+    summary.totalStudents ||
+    0
+  );
+
+
+  setText(
+    "adminReportRecordedDates",
+    summary.recordedDates ||
+    0
+  );
+
+
+  setText(
+    "adminReportTotalRecords",
+    summary.totalRecords ||
+    0
+  );
+
+
+  setText(
+    "adminReportAttendanceRate",
+    `${summary.attendanceRate || 0}%`
+  );
+
+
+  setText(
+    "adminReportPresent",
+    summary.present ||
+    0
+  );
+
+
+  setText(
+    "adminReportAbsent",
+    summary.absent ||
+    0
+  );
+
+
+  setText(
+    "adminReportLate",
+    summary.late ||
+    0
+  );
+
+
+  setText(
+    "adminReportExcused",
+    summary.excused ||
+    0
+  );
+
+
+  renderAdminClassSummary(
+    data.classSummaries ||
+    []
+  );
+
+
+  renderAdminStudentSummary(
+    data.students ||
+    []
+  );
+
+}
+
+
+/* =========================================
+   ADMIN CLASS SUMMARY TABLE
+========================================= */
+
+function renderAdminClassSummary(
+  classes
+) {
+
+  const body =
+    document.getElementById(
+      "adminReportClassSummaryBody"
+    );
+
+
+  if (
+    !classes.length
+  ) {
+
+    body.innerHTML = `
+      <tr>
+
+        <td
+          colspan="7"
+          class="table-empty"
+        >
+          No class records found
+          for the selected period.
+        </td>
+
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  body.innerHTML =
+    classes
+      .map(
+        item => `
+          <tr>
+
+            <td>
+              <strong>
+                ${escapeHtml(
+                  item.className ||
+                  item.classCode
+                )}
+              </strong>
+            </td>
+
+            <td>
+              ${item.recorded || 0}
+            </td>
+
+            <td>
+              ${item.present || 0}
+            </td>
+
+            <td>
+              ${item.absent || 0}
+            </td>
+
+            <td>
+              ${item.late || 0}
+            </td>
+
+            <td>
+              ${item.excused || 0}
+            </td>
+
+            <td>
+              ${formatAttendanceRate(
+                item.attendanceRate
+              )}
+            </td>
+
+          </tr>
+        `
+      )
+      .join("");
+
+}
+
+
+/* =========================================
+   ADMIN STUDENT SUMMARY TABLE
+========================================= */
+
+function renderAdminStudentSummary(
+  students
+) {
+
+  const body =
+    document.getElementById(
+      "adminReportStudentBody"
+    );
+
+
+  if (
+    !students.length
+  ) {
+
+    body.innerHTML = `
+      <tr>
+
+        <td
+          colspan="9"
+          class="table-empty"
+        >
+          No attendance records found
+          for the selected period.
+        </td>
+
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  body.innerHTML =
+    students
+      .map(
+        (
+          student,
+          index
+        ) => `
+          <tr>
+
+            <td>
+              ${index + 1}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                student.studentName
+              )}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                student.className ||
+                student.classCode
+              )}
+            </td>
+
+            <td>
+              ${student.recordedDays || 0}
+            </td>
+
+            <td>
+              ${student.present || 0}
+            </td>
+
+            <td>
+              ${student.absent || 0}
+            </td>
+
+            <td>
+              ${student.late || 0}
+            </td>
+
+            <td>
+              ${student.excused || 0}
+            </td>
+
+            <td>
+              ${formatAttendanceRate(
+                student.attendanceRate
+              )}
+            </td>
+
+          </tr>
+        `
+      )
+      .join("");
+
+}
+
+
+/* =========================================
+   TEACHER ATTENDANCE REPORT
+========================================= */
+
+async function generateTeacherAttendanceReport() {
+
+  const startDate =
+    document.getElementById(
+      "teacherReportStartDate"
+    ).value;
+
+
+  const endDate =
+    document.getElementById(
+      "teacherReportEndDate"
+    ).value;
+
+
+  const message =
+    document.getElementById(
+      "teacherReportMessage"
+    );
+
+
+  const button =
+    document.getElementById(
+      "teacherGenerateReportButton"
+    );
+
+
+  message.textContent =
+    "";
+
+
+  if (
+    !validateReportDates(
+      startDate,
+      endDate,
+      message
+    )
+  ) {
+    return;
+  }
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Generating...";
+
+
+  showLoading(
+    "Generating attendance report..."
+  );
+
+
+  try {
+
+    const data =
+      await apiRequest({
+
+        action:
+          "get-attendance-report",
+
+        email:
+          currentEmail,
+
+        startDate,
+
+        endDate
+
+      });
+
+
+    teacherReportData =
+      data;
+
+
+    renderTeacherAttendanceReport(
+      data
+    );
+
+
+    document.getElementById(
+      "teacherPrintReportButton"
+    ).disabled =
+      false;
+
+
+    showToast(
+      "Attendance report generated."
+    );
+
+  }
+  catch (error) {
+
+    teacherReportData =
+      null;
+
+
+    document.getElementById(
+      "teacherPrintReportButton"
+    ).disabled =
+      true;
+
+
+    message.textContent =
+      error.message;
+
+
+    showToast(
+      error.message,
+      true
+    );
+
+  }
+  finally {
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Generate Report";
+
+
+    hideLoading();
+
+  }
+
+}
+
+
+/* =========================================
+   RENDER TEACHER ATTENDANCE REPORT
+========================================= */
+
+function renderTeacherAttendanceReport(
+  data
+) {
+
+  const summary =
+    data.summary ||
+    {};
+
+
+  document.getElementById(
+    "teacherReportHeader"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "teacherReportSummary"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "teacherReportStatusSummary"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  document.getElementById(
+    "teacherReportStudentArea"
+  ).classList.remove(
+    "hidden"
+  );
+
+
+  setText(
+    "teacherReportTitle",
+    `${data.scope?.className || "Class"} Attendance Report`
+  );
+
+
+  setText(
+    "teacherReportPeriod",
+    `${data.range?.startDisplay || data.range?.startDate || ""} to ${data.range?.endDisplay || data.range?.endDate || ""}`
+  );
+
+
+  setText(
+    "teacherReportStudents",
+    summary.totalStudents ||
+    0
+  );
+
+
+  setText(
+    "teacherReportRecordedDates",
+    summary.recordedDates ||
+    0
+  );
+
+
+  setText(
+    "teacherReportTotalRecords",
+    summary.totalRecords ||
+    0
+  );
+
+
+  setText(
+    "teacherReportAttendanceRate",
+    `${summary.attendanceRate || 0}%`
+  );
+
+
+  setText(
+    "teacherReportPresent",
+    summary.present ||
+    0
+  );
+
+
+  setText(
+    "teacherReportAbsent",
+    summary.absent ||
+    0
+  );
+
+
+  setText(
+    "teacherReportLate",
+    summary.late ||
+    0
+  );
+
+
+  setText(
+    "teacherReportExcused",
+    summary.excused ||
+    0
+  );
+
+
+  renderTeacherStudentSummary(
+    data.students ||
+    []
+  );
+
+}
+
+
+/* =========================================
+   TEACHER STUDENT SUMMARY
+========================================= */
+
+function renderTeacherStudentSummary(
+  students
+) {
+
+  const body =
+    document.getElementById(
+      "teacherReportStudentBody"
+    );
+
+
+  if (
+    !students.length
+  ) {
+
+    body.innerHTML = `
+      <tr>
+
+        <td
+          colspan="8"
+          class="table-empty"
+        >
+          No attendance records found
+          for the selected period.
+        </td>
+
+      </tr>
+    `;
+
+    return;
+
+  }
+
+
+  body.innerHTML =
+    students
+      .map(
+        (
+          student,
+          index
+        ) => `
+          <tr>
+
+            <td>
+              ${index + 1}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                student.studentName
+              )}
+            </td>
+
+            <td>
+              ${student.recordedDays || 0}
+            </td>
+
+            <td>
+              ${student.present || 0}
+            </td>
+
+            <td>
+              ${student.absent || 0}
+            </td>
+
+            <td>
+              ${student.late || 0}
+            </td>
+
+            <td>
+              ${student.excused || 0}
+            </td>
+
+            <td>
+              ${formatAttendanceRate(
+                student.attendanceRate
+              )}
+            </td>
+
+          </tr>
+        `
+      )
+      .join("");
+
+}
+
+
+/* =========================================
+   VALIDATE REPORT DATES
+========================================= */
+
+function validateReportDates(
+  startDate,
+  endDate,
+  messageElement
+) {
+
+  if (
+    !startDate ||
+    !endDate
+  ) {
+
+    messageElement.textContent =
+      "Please select a start date and end date.";
+
+    return false;
+
+  }
+
+
+  if (
+    startDate >
+    endDate
+  ) {
+
+    messageElement.textContent =
+      "Start date cannot be later than end date.";
+
+    return false;
+
+  }
+
+
+  return true;
+
+}
+
+
+/* =========================================
+   PRINT ATTENDANCE REPORT
+========================================= */
+
+function printAttendanceReport(
+  role
+) {
+
+  const data =
+    role ===
+    "ADMIN"
+      ? adminReportData
+      : teacherReportData;
+
+
+  if (!data) {
+
+    showToast(
+      "Generate a report first.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  const students =
+    data.students ||
+    [];
+
+
+  const classSummaries =
+    data.classSummaries ||
+    [];
+
+
+  const summary =
+    data.summary ||
+    {};
+
+
+  const isAdmin =
+    role ===
+    "ADMIN";
+
+
+  const studentRows =
+    students
+      .map(
+        (
+          student,
+          index
+        ) => `
+          <tr>
+
+            <td>
+              ${index + 1}
+            </td>
+
+            <td>
+              ${escapeHtml(
+                student.studentName
+              )}
+            </td>
+
+            ${
+              isAdmin
+                ? `
+                  <td>
+                    ${escapeHtml(
+                      student.className ||
+                      student.classCode
+                    )}
+                  </td>
+                `
+                : ""
+            }
+
+            <td>
+              ${student.recordedDays || 0}
+            </td>
+
+            <td>
+              ${student.present || 0}
+            </td>
+
+            <td>
+              ${student.absent || 0}
+            </td>
+
+            <td>
+              ${student.late || 0}
+            </td>
+
+            <td>
+              ${student.excused || 0}
+            </td>
+
+            <td>
+              ${student.attendanceRate || 0}%
+            </td>
+
+          </tr>
+        `
+      )
+      .join("");
+
+
+  const classSummarySection =
+    isAdmin &&
+    classSummaries.length
+      ? `
+        <h3>
+          Class Summary
+        </h3>
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Class
+              </th>
+
+              <th>
+                Records
+              </th>
+
+              <th>
+                Present
+              </th>
+
+              <th>
+                Absent
+              </th>
+
+              <th>
+                Late
+              </th>
+
+              <th>
+                Excused
+              </th>
+
+              <th>
+                Attendance Rate
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            ${
+              classSummaries
+                .map(
+                  item => `
+                    <tr>
+
+                      <td>
+                        ${escapeHtml(
+                          item.className ||
+                          item.classCode
+                        )}
+                      </td>
+
+                      <td>
+                        ${item.recorded || 0}
+                      </td>
+
+                      <td>
+                        ${item.present || 0}
+                      </td>
+
+                      <td>
+                        ${item.absent || 0}
+                      </td>
+
+                      <td>
+                        ${item.late || 0}
+                      </td>
+
+                      <td>
+                        ${item.excused || 0}
+                      </td>
+
+                      <td>
+                        ${item.attendanceRate || 0}%
+                      </td>
+
+                    </tr>
+                  `
+                )
+                .join("")
+            }
+
+          </tbody>
+
+        </table>
+      `
+      : "";
+
+
+  const printWindow =
+    window.open(
+      "",
+      "_blank"
+    );
+
+
+  if (
+    !printWindow
+  ) {
+
+    showToast(
+      "Please allow pop-ups to print the report.",
+      true
+    );
+
+    return;
+
+  }
+
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+      <title>
+        UPS Attendance Report
+      </title>
+
+      <style>
+
+        @page {
+          size:
+            landscape;
+
+          margin:
+            12mm;
+        }
+
+
+        body {
+
+          font-family:
+            Arial,
+            sans-serif;
+
+          color:
+            #222;
+
+          padding:
+            10px;
+
+        }
+
+
+        .header {
+
+          margin-bottom:
+            18px;
+
+        }
+
+
+        .header h1 {
+
+          margin:
+            0
+            0
+            4px;
+
+          font-size:
+            22px;
+
+        }
+
+
+        .header h2 {
+
+          margin:
+            0
+            0
+            5px;
+
+          font-size:
+            17px;
+
+        }
+
+
+        .header p {
+
+          margin:
+            3px
+            0;
+
+          color:
+            #555;
+
+          font-size:
+            12px;
+
+        }
+
+
+        .summary {
+
+          display:
+            grid;
+
+          grid-template-columns:
+            repeat(
+              4,
+              1fr
+            );
+
+          gap:
+            8px;
+
+          margin-bottom:
+            18px;
+
+        }
+
+
+        .summary-box {
+
+          border:
+            1px solid
+            #ccc;
+
+          padding:
+            10px;
+
+        }
+
+
+        .summary-box span {
+
+          display:
+            block;
+
+          font-size:
+            10px;
+
+          color:
+            #666;
+
+        }
+
+
+        .summary-box strong {
+
+          display:
+            block;
+
+          margin-top:
+            4px;
+
+          font-size:
+            16px;
+
+        }
+
+
+        h3 {
+
+          margin-top:
+            22px;
+
+          margin-bottom:
+            8px;
+
+        }
+
+
+        table {
+
+          width:
+            100%;
+
+          border-collapse:
+            collapse;
+
+          margin-bottom:
+            20px;
+
+        }
+
+
+        th,
+        td {
+
+          border:
+            1px solid
+            #bbb;
+
+          padding:
+            6px;
+
+          text-align:
+            left;
+
+          font-size:
+            9px;
+
+        }
+
+
+        th {
+
+          background:
+            #f0edf7;
+
+        }
+
+      </style>
+
+    </head>
+
+
+    <body>
+
+
+      <div class="header">
+
+        <h1>
+          Universal Philippine School
+        </h1>
+
+        <h2>
+          Attendance Report
+        </h2>
+
+        <p>
+          Class:
+          ${escapeHtml(
+            data.scope?.className ||
+            "All Classes"
+          )}
+        </p>
+
+        <p>
+          Period:
+          ${escapeHtml(
+            data.range?.startDisplay ||
+            data.range?.startDate ||
+            ""
+          )}
+          -
+          ${escapeHtml(
+            data.range?.endDisplay ||
+            data.range?.endDate ||
+            ""
+          )}
+        </p>
+
+      </div>
+
+
+      <div class="summary">
+
+        <div class="summary-box">
+
+          <span>
+            Students
+          </span>
+
+          <strong>
+            ${summary.totalStudents || 0}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Recorded Days
+          </span>
+
+          <strong>
+            ${summary.recordedDates || 0}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Total Records
+          </span>
+
+          <strong>
+            ${summary.totalRecords || 0}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Attendance Rate
+          </span>
+
+          <strong>
+            ${summary.attendanceRate || 0}%
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Present
+          </span>
+
+          <strong>
+            ${summary.present || 0}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Absent
+          </span>
+
+          <strong>
+            ${summary.absent || 0}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Late
+          </span>
+
+          <strong>
+            ${summary.late || 0}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-box">
+
+          <span>
+            Excused
+          </span>
+
+          <strong>
+            ${summary.excused || 0}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      ${classSummarySection}
+
+
+      <h3>
+        Student Attendance Summary
+      </h3>
+
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              #
+            </th>
+
+            <th>
+              Student Name
+            </th>
+
+            ${
+              isAdmin
+                ? `
+                  <th>
+                    Class
+                  </th>
+                `
+                : ""
+            }
+
+            <th>
+              Recorded Days
+            </th>
+
+            <th>
+              Present
+            </th>
+
+            <th>
+              Absent
+            </th>
+
+            <th>
+              Late
+            </th>
+
+            <th>
+              Excused
+            </th>
+
+            <th>
+              Attendance Rate
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          ${studentRows}
+
+        </tbody>
+
+      </table>
+
+
+    </body>
+
+    </html>
+  `);
+
+
+  printWindow.document.close();
+
+  printWindow.focus();
+
+
+  setTimeout(
+    () => {
+
+      printWindow.print();
+
+    },
+    300
+  );
+
+}
+
+
+/* =========================================
+   FORMAT ATTENDANCE RATE
+========================================= */
+
+function formatAttendanceRate(
+  value
+) {
+
+  const rate =
+    Number(
+      value
+    ) ||
+    0;
+
+
+  let extraClass =
+    "good";
+
+
+  if (
+    rate <
+    75
+  ) {
+
+    extraClass =
+      "low";
+
+  }
+  else if (
+    rate <
+    90
+  ) {
+
+    extraClass =
+      "warning";
+
+  }
+
+
+  return `
+    <span
+      class="report-rate ${extraClass}"
+    >
+      ${rate}%
+    </span>
+  `;
 
 }
 
@@ -2030,7 +3983,8 @@ async function searchStudents() {
 
 
   if (
-    searchText.length < 2
+    searchText.length <
+    2
   ) {
 
     container.innerHTML = `
@@ -2055,6 +4009,7 @@ async function searchStudents() {
 
     const students =
       await apiRequest({
+
         action:
           "search-students",
 
@@ -2062,6 +4017,7 @@ async function searchStudents() {
           currentEmail,
 
         searchText
+
       });
 
 
@@ -2114,7 +4070,8 @@ function renderSearchResults(
   }
 
 
-  container.innerHTML = "";
+  container.innerHTML =
+    "";
 
 
   students.forEach(
@@ -2140,6 +4097,7 @@ function renderSearchResults(
           </strong>
 
           <span>
+
             ID:
             ${escapeHtml(
               student.studentId
@@ -2151,9 +4109,11 @@ function renderSearchResults(
               student.className ||
               student.classCode
             )}
+
           </span>
 
         </div>
+
 
         <button
           type="button"
@@ -2202,15 +4162,13 @@ function openStudentProfile(
     studentId;
 
 
-  const modal =
-    document.getElementById(
+  document
+    .getElementById(
       "studentProfileModal"
+    )
+    .classList.remove(
+      "hidden"
     );
-
-
-  modal.classList.remove(
-    "hidden"
-  );
 
 
   const endDate =
@@ -2225,9 +4183,13 @@ function openStudentProfile(
 
   const start =
     new Date(
+
       end.getFullYear(),
+
       end.getMonth(),
+
       1
+
     );
 
 
@@ -2281,6 +4243,7 @@ async function loadStudentProfile(
 
     const data =
       await apiRequest({
+
         action:
           "get-student-profile",
 
@@ -2292,6 +4255,7 @@ async function loadStudentProfile(
         startDate,
 
         endDate
+
       });
 
 
@@ -2326,22 +4290,26 @@ function renderStudentProfile(
 ) {
 
   const student =
-    data.student || {};
+    data.student ||
+    {};
 
 
   const summary =
-    data.summary || {};
+    data.summary ||
+    {};
 
 
   setText(
     "profileStudentName",
-    student.studentName || "-"
+    student.studentName ||
+    "-"
   );
 
 
   setText(
     "profileStudentId",
-    student.studentId || "-"
+    student.studentId ||
+    "-"
   );
 
 
@@ -2368,25 +4336,29 @@ function renderStudentProfile(
 
   setText(
     "profilePresentCount",
-    summary.present || 0
+    summary.present ||
+    0
   );
 
 
   setText(
     "profileAbsentCount",
-    summary.absent || 0
+    summary.absent ||
+    0
   );
 
 
   setText(
     "profileLateCount",
-    summary.late || 0
+    summary.late ||
+    0
   );
 
 
   setText(
     "profileExcusedCount",
-    summary.excused || 0
+    summary.excused ||
+    0
   );
 
 
@@ -2415,7 +4387,8 @@ function renderStudentProfile(
 
 
   const history =
-    data.history || [];
+    data.history ||
+    [];
 
 
   if (
@@ -2424,6 +4397,7 @@ function renderStudentProfile(
 
     historyBody.innerHTML = `
       <tr>
+
         <td
           colspan="3"
           class="table-empty"
@@ -2431,6 +4405,7 @@ function renderStudentProfile(
           No attendance history
           for this period.
         </td>
+
       </tr>
     `;
 
@@ -2460,7 +4435,8 @@ function renderStudentProfile(
 
             <td>
               ${escapeHtml(
-                record.remarks || ""
+                record.remarks ||
+                ""
               )}
             </td>
 
@@ -2505,11 +4481,6 @@ async function loadClassDetails(
   currentClassCode =
     classCode;
 
-  currentClassDetailDate =
-    date || currentAdminDate || getDubaiDate();
-
-  adminAttendanceEditing = false;
-
 
   document
     .getElementById(
@@ -2529,6 +4500,7 @@ async function loadClassDetails(
 
     const data =
       await apiRequest({
+
         action:
           "get-class-details",
 
@@ -2538,6 +4510,7 @@ async function loadClassDetails(
         classCode,
 
         date
+
       });
 
 
@@ -2590,75 +4563,38 @@ function renderClassDetails(
   );
 
 
-  currentClassDetailDate =
-    data.date ||
-    currentClassDetailDate ||
-    currentAdminDate ||
-    getDubaiDate();
-
-
   const summary =
-    data.summary || {};
+    data.summary ||
+    {};
 
 
   setText(
     "classDetailEnrolled",
-    summary.enrolled || 0
+    summary.enrolled ||
+    0
   );
 
 
   setText(
     "classDetailPresent",
-    summary.present || 0
+    summary.present ||
+    0
   );
 
 
   setText(
     "classDetailAbsent",
-    summary.absent || 0
+    summary.absent ||
+    0
   );
 
 
   setText(
     "classDetailLate",
-    summary.late || 0
+    summary.late ||
+    0
   );
 
-
-  adminAttendanceData =
-    (data.students || []).map(
-      student => ({
-        ...student,
-        status:
-          String(
-            student.status ||
-            "PRESENT"
-          )
-            .trim()
-            .toUpperCase(),
-
-        remarks:
-          student.remarks || ""
-      })
-    );
-
-
-  adminAttendanceEditing = false;
-
-  setAdminAttendanceEditMode(
-    false
-  );
-
-  renderAdminClassAttendanceRows();
-
-}
-
-
-/* =========================================
-   ADMIN CLASS ATTENDANCE ROWS
-========================================= */
-
-function renderAdminClassAttendanceRows() {
 
   const body =
     document.getElementById(
@@ -2666,23 +4602,25 @@ function renderAdminClassAttendanceRows() {
     );
 
 
-  if (!body) {
-    return;
-  }
+  const students =
+    data.students ||
+    [];
 
 
   if (
-    !adminAttendanceData.length
+    !students.length
   ) {
 
     body.innerHTML = `
       <tr>
+
         <td
           colspan="3"
           class="table-empty"
         >
           No active students found.
         </td>
+
       </tr>
     `;
 
@@ -2691,11 +4629,12 @@ function renderAdminClassAttendanceRows() {
   }
 
 
-  body.innerHTML = "";
+  body.innerHTML =
+    "";
 
 
-  adminAttendanceData.forEach(
-    (student, index) => {
+  students.forEach(
+    student => {
 
       const row =
         document.createElement(
@@ -2703,104 +4642,40 @@ function renderAdminClassAttendanceRows() {
         );
 
 
-      const studentButton = `
-        <button
-          type="button"
-          class="student-name-button"
-          data-student-id="${escapeAttribute(
-            student.studentId
-          )}"
-        >
-          ${escapeHtml(
-            student.studentName
-          )}
-        </button>
-      `;
+      row.innerHTML = `
+        <td>
 
-
-      if (
-        adminAttendanceEditing
-      ) {
-
-        const options = [
-          "PRESENT",
-          "ABSENT",
-          "LATE",
-          "EXCUSED"
-        ]
-          .map(
-            status => `
-              <option
-                value="${status}"
-                ${
-                  student.status === status
-                    ? "selected"
-                    : ""
-                }
-              >
-                ${capitalize(status)}
-              </option>
-            `
-          )
-          .join("");
-
-
-        row.innerHTML = `
-          <td>
-            ${studentButton}
-          </td>
-
-          <td>
-            <select
-              class="attendance-status admin-attendance-status"
-              data-index="${index}"
-            >
-              ${options}
-            </select>
-          </td>
-
-          <td>
-            <input
-              type="text"
-              class="attendance-remarks admin-attendance-remarks"
-              data-index="${index}"
-              value="${escapeAttribute(
-                student.remarks || ""
-              )}"
-              placeholder="Optional remarks"
-            />
-          </td>
-        `;
-
-      }
-      else {
-
-        row.innerHTML = `
-          <td>
-            ${studentButton}
-          </td>
-
-          <td>
-            ${statusBadge(
-              student.status
-            )}
-          </td>
-
-          <td>
+          <button
+            type="button"
+            class="student-name-button"
+          >
             ${escapeHtml(
-              student.remarks || ""
+              student.studentName
             )}
-          </td>
-        `;
+          </button>
 
-      }
+        </td>
+
+        <td>
+          ${statusBadge(
+            student.status
+          )}
+        </td>
+
+        <td>
+          ${escapeHtml(
+            student.remarks ||
+            ""
+          )}
+        </td>
+      `;
 
 
       row
         .querySelector(
           ".student-name-button"
         )
-        ?.addEventListener(
+        .addEventListener(
           "click",
           () => {
 
@@ -2812,451 +4687,12 @@ function renderAdminClassAttendanceRows() {
         );
 
 
-      if (
-        adminAttendanceEditing
-      ) {
-
-        row
-          .querySelector(
-            ".admin-attendance-status"
-          )
-          ?.addEventListener(
-            "change",
-            event => {
-
-              adminAttendanceData[
-                index
-              ].status =
-                event.target.value;
-
-              updateAdminClassCounts();
-
-            }
-          );
-
-
-        row
-          .querySelector(
-            ".admin-attendance-remarks"
-          )
-          ?.addEventListener(
-            "input",
-            event => {
-
-              adminAttendanceData[
-                index
-              ].remarks =
-                event.target.value;
-
-            }
-          );
-
-      }
-
-
       body.appendChild(
         row
       );
 
     }
   );
-
-
-  updateAdminClassCounts();
-
-}
-
-
-/* =========================================
-   ADMIN ATTENDANCE EDIT MODE
-========================================= */
-
-function setAdminAttendanceEditMode(
-  editing
-) {
-
-  adminAttendanceEditing =
-    editing;
-
-
-  const editButton =
-    document.getElementById(
-      "adminEditAttendanceButton"
-    );
-
-
-  const saveButton =
-    document.getElementById(
-      "adminSaveAttendanceButton"
-    );
-
-
-  const cancelButton =
-    document.getElementById(
-      "adminCancelAttendanceEditButton"
-    );
-
-
-  const message =
-    document.getElementById(
-      "adminAttendanceEditMessage"
-    );
-
-
-  if (editButton) {
-    editButton.classList.toggle(
-      "hidden",
-      editing
-    );
-  }
-
-
-  if (saveButton) {
-    saveButton.classList.toggle(
-      "hidden",
-      !editing
-    );
-  }
-
-
-  if (cancelButton) {
-    cancelButton.classList.toggle(
-      "hidden",
-      !editing
-    );
-  }
-
-
-  if (message) {
-
-    message.textContent =
-      editing
-        ? "Administrator edit mode is active."
-        : "";
-
-  }
-
-}
-
-
-/* =========================================
-   ENABLE ADMIN ATTENDANCE EDITING
-========================================= */
-
-function enableAdminAttendanceEditing() {
-
-  if (
-    !currentUser ||
-    currentUser.role !== "ADMIN"
-  ) {
-
-    showToast(
-      "Administrator access required.",
-      true
-    );
-
-    return;
-
-  }
-
-
-  if (
-    !adminAttendanceData.length
-  ) {
-
-    showToast(
-      "There are no students to edit.",
-      true
-    );
-
-    return;
-
-  }
-
-
-  setAdminAttendanceEditMode(
-    true
-  );
-
-
-  renderAdminClassAttendanceRows();
-
-}
-
-
-/* =========================================
-   CANCEL ADMIN ATTENDANCE EDITING
-========================================= */
-
-async function cancelAdminAttendanceEditing() {
-
-  if (
-    !currentClassCode
-  ) {
-
-    setAdminAttendanceEditMode(
-      false
-    );
-
-    return;
-
-  }
-
-
-  setAdminAttendanceEditMode(
-    false
-  );
-
-
-  await loadClassDetails(
-    currentClassCode,
-    currentClassDetailDate ||
-    currentAdminDate
-  );
-
-}
-
-
-/* =========================================
-   ADMIN CLASS COUNTS
-========================================= */
-
-function updateAdminClassCounts() {
-
-  const counts = {
-    PRESENT: 0,
-    ABSENT: 0,
-    LATE: 0,
-    EXCUSED: 0
-  };
-
-
-  adminAttendanceData.forEach(
-    student => {
-
-      const status =
-        String(
-          student.status || ""
-        )
-          .trim()
-          .toUpperCase();
-
-
-      if (
-        counts[
-          status
-        ] !== undefined
-      ) {
-
-        counts[
-          status
-        ]++;
-
-      }
-
-    }
-  );
-
-
-  setText(
-    "classDetailPresent",
-    counts.PRESENT
-  );
-
-
-  setText(
-    "classDetailAbsent",
-    counts.ABSENT
-  );
-
-
-  setText(
-    "classDetailLate",
-    counts.LATE
-  );
-
-}
-
-
-/* =========================================
-   SAVE ADMIN ATTENDANCE
-========================================= */
-
-async function saveAdminAttendance() {
-
-  if (
-    !currentUser ||
-    currentUser.role !== "ADMIN"
-  ) {
-
-    showToast(
-      "Administrator access required.",
-      true
-    );
-
-    return;
-
-  }
-
-
-  if (
-    !currentClassCode
-  ) {
-
-    showToast(
-      "No class is selected.",
-      true
-    );
-
-    return;
-
-  }
-
-
-  if (
-    !adminAttendanceData.length
-  ) {
-
-    showToast(
-      "There are no students to save.",
-      true
-    );
-
-    return;
-
-  }
-
-
-  const button =
-    document.getElementById(
-      "adminSaveAttendanceButton"
-    );
-
-
-  const message =
-    document.getElementById(
-      "adminAttendanceEditMessage"
-    );
-
-
-  if (button) {
-
-    button.disabled = true;
-    button.textContent =
-      "Saving...";
-
-  }
-
-
-  if (message) {
-
-    message.textContent = "";
-
-  }
-
-
-  try {
-
-    const attendance =
-      adminAttendanceData.map(
-        student => ({
-          studentId:
-            student.studentId,
-
-          status:
-            student.status,
-
-          remarks:
-            student.remarks || ""
-        })
-      );
-
-
-    const result =
-      await apiRequest({
-        action:
-          "admin-submit-attendance",
-
-        email:
-          currentEmail,
-
-        classCode:
-          currentClassCode,
-
-        date:
-          currentClassDetailDate ||
-          currentAdminDate ||
-          getDubaiDate(),
-
-        attendance
-      });
-
-
-    if (message) {
-
-      message.style.color =
-        "var(--success)";
-
-      message.textContent =
-        result.message ||
-        "Attendance saved by administrator.";
-
-    }
-
-
-    showToast(
-      result.message ||
-      "Attendance saved by administrator."
-    );
-
-
-    setAdminAttendanceEditMode(
-      false
-    );
-
-
-    await loadAdminDashboard(
-      currentAdminDate
-    );
-
-
-    await loadClassDetails(
-      currentClassCode,
-      currentClassDetailDate ||
-      currentAdminDate
-    );
-
-  }
-  catch (error) {
-
-    if (message) {
-
-      message.style.color =
-        "var(--danger)";
-
-      message.textContent =
-        error.message;
-
-    }
-
-
-    showToast(
-      error.message,
-      true
-    );
-
-  }
-  finally {
-
-    if (button) {
-
-      button.disabled = false;
-      button.textContent =
-        "Save Attendance";
-
-    }
-
-  }
 
 }
 
@@ -3279,18 +4715,6 @@ function closeClassDetail() {
   currentClassCode =
     "";
 
-  currentClassDetailDate =
-    "";
-
-  adminAttendanceData = [];
-
-  adminAttendanceEditing =
-    false;
-
-  setAdminAttendanceEditMode(
-    false
-  );
-
 }
 
 
@@ -3304,7 +4728,8 @@ function statusBadge(
 
   const cleanStatus =
     String(
-      status || ""
+      status ||
+      ""
     )
       .trim()
       .toUpperCase();
@@ -3338,7 +4763,8 @@ function statusBadge(
 ========================================= */
 
 function showLoading(
-  text = "Loading..."
+  text =
+    "Loading..."
 ) {
 
   const overlay =
@@ -3381,12 +4807,14 @@ function hideLoading() {
    TOAST
 ========================================= */
 
-let toastTimer = null;
+let toastTimer =
+  null;
 
 
 function showToast(
   message,
-  isError = false
+  isError =
+    false
 ) {
 
   const toast =
@@ -3440,6 +4868,7 @@ function getDubaiDate() {
     new Intl.DateTimeFormat(
       "en-CA",
       {
+
         timeZone:
           "Asia/Dubai",
 
@@ -3451,6 +4880,7 @@ function getDubaiDate() {
 
         day:
           "2-digit"
+
       }
     )
       .formatToParts(
@@ -3491,16 +4921,25 @@ function parseDateOnly(
   ] =
     value
       .split("-")
-      .map(Number);
+      .map(
+        Number
+      );
 
 
   return new Date(
+
     year,
+
     month - 1,
+
     day,
+
     12,
+
     0,
+
     0
+
   );
 
 }
@@ -3516,7 +4955,8 @@ function formatDateOnly(
 
   const month =
     String(
-      date.getMonth() + 1
+      date.getMonth() +
+      1
     ).padStart(
       2,
       "0"
@@ -3539,6 +4979,29 @@ function formatDateOnly(
 }
 
 
+function setDateInput(
+  id,
+  value
+) {
+
+  const input =
+    document.getElementById(
+      id
+    );
+
+
+  if (
+    input
+  ) {
+
+    input.value =
+      value;
+
+  }
+
+}
+
+
 /* =========================================
    GENERAL HELPERS
 ========================================= */
@@ -3554,7 +5017,9 @@ function setText(
     );
 
 
-  if (element) {
+  if (
+    element
+  ) {
 
     element.textContent =
       value;
@@ -3575,15 +5040,26 @@ function setWidth(
     );
 
 
-  if (element) {
+  if (
+    element
+  ) {
 
     const safeValue =
       Math.max(
+
         0,
+
         Math.min(
+
           100,
-          Number(value) || 0
+
+          Number(
+            value
+          ) ||
+          0
+
         )
+
       );
 
 
@@ -3600,12 +5076,16 @@ function capitalize(
 ) {
 
   const text =
-    String(value || "")
+    String(
+      value ||
+      ""
+    )
       .toLowerCase();
 
 
   return (
-    text.charAt(0)
+    text
+      .charAt(0)
       .toUpperCase() +
     text.slice(1)
   );
@@ -3618,7 +5098,9 @@ function isValidEmail(
 ) {
 
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    .test(email);
+    .test(
+      email
+    );
 
 }
 
@@ -3632,7 +5114,8 @@ function escapeHtml(
 ) {
 
   return String(
-    value ?? ""
+    value ??
+    ""
   )
     .replaceAll(
       "&",
