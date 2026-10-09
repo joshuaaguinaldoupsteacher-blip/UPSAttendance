@@ -280,6 +280,10 @@
               0%
             </strong>
 
+            <small id="kpiSubmittedClasses" style="display:block; margin-top:6px; font-size:13px; font-weight:500; opacity:0.8;">
+              0 of 0 classes submitted
+            </small>
+
           </article>
 
 
@@ -2201,6 +2205,75 @@
 
 
 <script src="app.js"></script>
+<script>
+  // Keep the KPI class count in sync with the existing submission summary.
+  (() => {
+    const source = document.getElementById('submissionProgressText');
+    const target = document.getElementById('kpiSubmittedClasses');
+    if (!source || !target) return;
+
+    const syncSubmittedCount = () => {
+      target.textContent = source.textContent.trim();
+    };
+
+    syncSubmittedCount();
+    new MutationObserver(syncSubmittedCount).observe(source, {
+      childList: true,
+      characterData: true,
+      subtree: true
+    });
+  })();
+</script>
+<script>
+  // Maintain the requested class order whenever the Class Monitor refreshes.
+  (() => {
+    const tbody = document.getElementById('classMonitorBody');
+    if (!tbody) return;
+
+    const desiredOrder = [
+      'KG1 Camel', 'KG2 Oryx', 'KG2 Falcon',
+      '1 Abu Dhabi', '1 Al Ain',
+      '2 Umm Al Quwain', '2 Ras Al Khaima',
+      '3 Sharjah', '4 Fujaira', '5 Dubai', '6 Etihad',
+      '7 Marina', '8 Hatta', '9 Oasis',
+      '10 Jebel Hafeet', '11 Jebel Jais', '12 Jebel Ali'
+    ];
+
+    function normalizeClassName(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/\bgrade\s*/g, '')
+        .replace(/\bkhaimah\b/g, 'khaima')
+        .replace(/\bfujairah\b/g, 'fujaira')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    const ranks = new Map(desiredOrder.map((name, index) => [normalizeClassName(name), index]));
+    const rank = row => {
+      const firstCell = row.cells[0];
+      if (!firstCell || row.cells.length < 2) return Number.MAX_SAFE_INTEGER;
+      return ranks.get(normalizeClassName(firstCell.textContent)) ?? Number.MAX_SAFE_INTEGER;
+    };
+
+    const observer = new MutationObserver(sortClassMonitor);
+
+    function sortClassMonitor() {
+      const rows = Array.from(tbody.rows);
+      const ordered = rows.map((row, index) => ({ row, index }))
+        .sort((a, b) => rank(a.row) - rank(b.row) || a.index - b.index)
+        .map(item => item.row);
+      if (rows.every((row, index) => row === ordered[index])) return;
+
+      // Disconnect while moving existing nodes to avoid observing our own sort.
+      observer.disconnect();
+      tbody.append(...ordered);
+      observer.observe(tbody, { childList: true, subtree: true, characterData: true });
+    }
+
+    observer.observe(tbody, { childList: true, subtree: true, characterData: true });
+    sortClassMonitor();
+  })();
+</script>
 
 </body>
 
