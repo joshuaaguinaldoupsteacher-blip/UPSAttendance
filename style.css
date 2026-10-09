@@ -167,7 +167,6 @@ button:disabled {
 .brand-block {
   display: flex;
   align-items: center;
-
   gap: 16px;
 
   padding:
@@ -207,10 +206,7 @@ button:disabled {
 }
 
 .brand-block h1 {
-  margin:
-    0
-    0
-    4px;
+  margin: 0 0 4px;
 
   font-size: 24px;
   line-height: 1.2;
@@ -219,8 +215,7 @@ button:disabled {
 .brand-block p {
   margin: 0;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 14px;
 }
@@ -228,41 +223,29 @@ button:disabled {
 .login-divider {
   height: 1px;
 
-  background:
-    var(--border);
+  background: var(--border);
 }
 
 .login-content {
-  padding:
-    30px
-    32px;
+  padding: 30px 32px;
 }
 
 .login-content h2 {
-  margin:
-    0
-    0
-    8px;
+  margin: 0 0 8px;
 
   font-size: 22px;
 }
 
 .login-description {
-  margin:
-    0
-    0
-    24px;
+  margin: 0 0 24px;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   line-height: 1.55;
 }
 
 .login-footer {
-  padding:
-    17px
-    32px;
+  padding: 17px 32px;
 
   border-top:
     1px solid
@@ -288,8 +271,7 @@ button:disabled {
 
   margin-bottom: 8px;
 
-  color:
-    var(--text);
+  color: var(--text);
 
   font-weight: 600;
   font-size: 13px;
@@ -307,8 +289,7 @@ button:disabled {
 
   background: white;
 
-  color:
-    var(--text);
+  color: var(--text);
 
   padding:
     12px
@@ -317,16 +298,13 @@ button:disabled {
   outline: none;
 
   transition:
-    border-color
-    var(--transition),
-    box-shadow
-    var(--transition);
+    border-color var(--transition),
+    box-shadow var(--transition);
 }
 
 .form-input:focus,
 .date-input:focus {
-  border-color:
-    var(--primary);
+  border-color: var(--primary);
 
   box-shadow:
     0 0 0 4px
@@ -349,8 +327,7 @@ select.form-input {
     0
     0;
 
-  color:
-    var(--danger);
+  color: var(--danger);
 
   font-size: 13px;
 }
@@ -370,14 +347,10 @@ select.form-input {
   font-weight: 600;
 
   transition:
-    transform
-    var(--transition),
-    box-shadow
-    var(--transition),
-    background
-    var(--transition),
-    opacity
-    var(--transition);
+    transform var(--transition),
+    box-shadow var(--transition),
+    background var(--transition),
+    opacity var(--transition);
 }
 
 .primary-button {
@@ -385,8 +358,7 @@ select.form-input {
     11px
     18px;
 
-  background:
-    var(--primary);
+  background: var(--primary);
 
   color: white;
 
@@ -396,8 +368,7 @@ select.form-input {
 }
 
 .primary-button:hover:not(:disabled) {
-  background:
-    var(--primary-dark);
+  background: var(--primary-dark);
 
   transform:
     translateY(-1px);
@@ -501,8 +472,7 @@ select.form-input {
 
   z-index: 20;
 
-  backdrop-filter:
-    blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .topbar-left,
@@ -529,8 +499,7 @@ select.form-input {
 
   border-radius: 12px;
 
-  background:
-    var(--primary);
+  background: var(--primary);
 
   color: white;
 
@@ -545,13 +514,9 @@ select.form-input {
 }
 
 .topbar-subtitle {
-  margin:
-    3px
-    0
-    0;
+  margin: 3px 0 0;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 12px;
 }
@@ -569,8 +534,7 @@ select.form-input {
 .user-summary span {
   margin-top: 2px;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 11px;
   text-transform: uppercase;
@@ -593,10 +557,7 @@ select.form-input {
 }
 
 .page-heading-row h2 {
-  margin:
-    0
-    0
-    6px;
+  margin: 0 0 6px;
 
   font-size: 26px;
 }
@@ -604,8 +565,7 @@ select.form-input {
 .page-heading-row p {
   margin: 0;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 }
 
 .date-controls {
@@ -628,15 +588,13 @@ select.form-input {
 .kpi-card,
 .status-card,
 .info-card {
-  background:
-    var(--surface);
+  background: var(--surface);
 
   border:
     1px solid
     var(--border);
 
-  border-radius:
-    var(--radius);
+  border-radius: var(--radius);
 }
 
 .panel {
@@ -660,10 +618,7 @@ select.form-input {
 }
 
 .panel-header h3 {
-  margin:
-    0
-    0
-    5px;
+  margin: 0 0 5px;
 
   font-size: 17px;
 }
@@ -671,8 +626,7 @@ select.form-input {
 .panel-header p {
   margin: 0;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 13px;
   line-height: 1.45;
@@ -742,8 +696,7 @@ select.form-input {
 
   margin-bottom: 11px;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 13px;
 }
@@ -766,8 +719,7 @@ select.form-input {
 .status-card span {
   display: block;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 12px;
   font-weight: 600;
@@ -786,8 +738,7 @@ select.form-input {
 
   margin-top: 3px;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 12px;
 }
@@ -827,8 +778,7 @@ select.form-input {
 
   overflow: hidden;
 
-  background:
-    #ececf3;
+  background: #ececf3;
 
   border-radius: 999px;
 }
@@ -860,8 +810,7 @@ select.form-input {
 .mini-progress-fill {
   height: 100%;
 
-  background:
-    var(--primary);
+  background: var(--primary);
 
   border-radius: inherit;
 
@@ -917,8 +866,7 @@ select.form-input {
 }
 
 .attention-item span {
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 12px;
 }
@@ -940,8 +888,7 @@ select.form-input {
 
   margin-bottom: 7px;
 
-  color:
-    var(--text-soft);
+  color: var(--text-soft);
 
   font-size: 12px;
   font-weight: 600;
@@ -967,11 +914,9 @@ select.form-input {
 .data-table {
   width: 100%;
 
-  border-collapse:
-    collapse;
+  border-collapse: collapse;
 
-  background:
-    white;
+  background: white;
 }
 
 .data-table th,
@@ -985,9 +930,7 @@ select.form-input {
     var(--border);
 
   text-align: left;
-
-  vertical-align:
-    middle;
+  vertical-align: middle;
 }
 
 .data-table th {
@@ -1000,14 +943,11 @@ select.form-input {
   font-size: 11px;
   font-weight: 700;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase;
 
-  letter-spacing:
-    0.45px;
+  letter-spacing: 0.45px;
 
-  white-space:
-    nowrap;
+  white-space: nowrap;
 }
 
 .data-table td {
@@ -1027,6 +967,11 @@ select.form-input {
   cursor: pointer;
 }
 
+.clickable-row:hover {
+  background:
+    var(--primary-soft) !important;
+}
+
 .table-empty {
   padding:
     28px !important;
@@ -1043,8 +988,7 @@ select.form-input {
 
   border: 0;
 
-  background:
-    transparent;
+  background: transparent;
 
   color:
     var(--primary-dark);
@@ -1055,8 +999,7 @@ select.form-input {
 }
 
 .student-name-button:hover {
-  text-decoration:
-    underline;
+  text-decoration: underline;
 }
 
 
@@ -1073,17 +1016,14 @@ select.form-input {
     5px
     9px;
 
-  border-radius:
-    999px;
+  border-radius: 999px;
 
   font-size: 10px;
   font-weight: 700;
 
-  letter-spacing:
-    0.4px;
+  letter-spacing: 0.4px;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase;
 }
 
 .status-badge.present,
@@ -1126,6 +1066,120 @@ select.form-input {
 
   color:
     #777786;
+}
+
+
+/* =========================================
+   ADMIN ATTENDANCE MANAGEMENT
+========================================= */
+
+.admin-edit-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  padding:
+    16px
+    18px;
+
+  margin-bottom: 10px;
+
+  border:
+    1px solid
+    #e3daf5;
+
+  border-radius: 13px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf8ff,
+      #f5f1fc
+    );
+}
+
+.admin-edit-toolbar strong {
+  display: block;
+
+  color:
+    var(--text);
+
+  font-size: 14px;
+}
+
+.admin-edit-toolbar p {
+  margin:
+    4px
+    0
+    0;
+
+  color:
+    var(--text-soft);
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.admin-edit-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+.admin-class-table select,
+.admin-class-table input {
+  width: 100%;
+
+  min-width: 130px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius: 9px;
+
+  padding:
+    9px
+    10px;
+
+  background: white;
+
+  color:
+    var(--text);
+
+  outline: none;
+
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.admin-class-table select:focus,
+.admin-class-table input:focus {
+  border-color:
+    var(--primary);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(118, 87, 184, 0.08);
+}
+
+.admin-class-table .admin-attendance-status {
+  font-weight: 600;
+}
+
+.admin-class-table .admin-attendance-remarks {
+  min-width: 200px;
+}
+
+#adminClassEditMessage {
+  margin-bottom: 12px;
 }
 
 
@@ -1197,10 +1251,7 @@ select.form-input {
 }
 
 .absentee-print-header h3 {
-  margin:
-    0
-    0
-    4px;
+  margin: 0 0 4px;
 }
 
 .absentee-print-header p {
@@ -1285,11 +1336,9 @@ select.form-input {
   font-size: 11px;
   font-weight: 600;
 
-  text-transform:
-    uppercase;
+  text-transform: uppercase;
 
-  letter-spacing:
-    0.45px;
+  letter-spacing: 0.45px;
 }
 
 .info-card strong {
@@ -1324,8 +1373,7 @@ select.form-input {
     9px
     10px;
 
-  background:
-    white;
+  background: white;
 
   outline: none;
 }
@@ -1381,18 +1429,15 @@ select.form-input {
 
   align-items: end;
 
-  padding:
-    18px;
+  padding: 18px;
 
-  margin-bottom:
-    24px;
+  margin-bottom: 24px;
 
   border:
     1px solid
     #e6e0f3;
 
-  border-radius:
-    14px;
+  border-radius: 14px;
 
   background:
     var(--primary-soft);
@@ -1429,25 +1474,20 @@ select.form-input {
     16px
     18px;
 
-  margin-bottom:
-    18px;
+  margin-bottom: 18px;
 
   border-left:
     4px solid
     var(--primary);
 
-  border-radius:
-    10px;
+  border-radius: 10px;
 
   background:
     var(--primary-soft);
 }
 
 .report-result-header h3 {
-  margin:
-    0
-    0
-    4px;
+  margin: 0 0 4px;
 
   font-size: 18px;
 }
@@ -1472,8 +1512,7 @@ select.form-input {
 
   gap: 16px;
 
-  margin-bottom:
-    18px;
+  margin-bottom: 18px;
 }
 
 .report-summary-grid .kpi-card {
@@ -1489,10 +1528,7 @@ select.form-input {
 }
 
 .report-table-section h4 {
-  margin:
-    0
-    0
-    12px;
+  margin: 0 0 12px;
 
   font-size: 15px;
 }
@@ -1503,13 +1539,12 @@ select.form-input {
 }
 
 .report-table td {
-  white-space:
-    nowrap;
+  white-space: nowrap;
 }
 
 .report-table td:nth-child(2) {
-  white-space:
-    normal;
+  white-space: normal;
+
   min-width: 180px;
 }
 
@@ -1536,11 +1571,9 @@ select.form-input {
 }
 
 .report-no-data {
-  padding:
-    30px;
+  padding: 30px;
 
-  text-align:
-    center;
+  text-align: center;
 
   color:
     var(--text-soft);
@@ -1549,8 +1582,7 @@ select.form-input {
     1px dashed
     var(--border);
 
-  border-radius:
-    12px;
+  border-radius: 12px;
 
   background:
     var(--surface-soft);
@@ -1559,8 +1591,7 @@ select.form-input {
 .report-loading {
   opacity: 0.65;
 
-  pointer-events:
-    none;
+  pointer-events: none;
 }
 
 
@@ -1579,15 +1610,11 @@ select.form-input {
 }
 
 .report-print-subtitle {
-  margin:
-    4px
-    0
-    0;
+  margin: 4px 0 0;
 
   font-size: 12px;
 
-  color:
-    #555;
+  color: #555;
 }
 
 
@@ -1686,10 +1713,7 @@ select.form-input {
 }
 
 .modal-header h3 {
-  margin:
-    0
-    0
-    4px;
+  margin: 0 0 4px;
 }
 
 .modal-header p {
@@ -1828,8 +1852,7 @@ select.form-input {
   border-top-color:
     var(--primary);
 
-  border-radius:
-    50%;
+  border-radius: 50%;
 
   animation:
     spin
@@ -1909,6 +1932,7 @@ select.form-input {
   .loading-overlay,
   .toast,
   .report-controls,
+  .admin-edit-toolbar,
   .panel-header button {
     display: none !important;
   }
@@ -1978,11 +2002,9 @@ select.form-input {
     background:
       #f1f1f1 !important;
 
-    -webkit-print-color-adjust:
-      exact;
+    -webkit-print-color-adjust: exact;
 
-    print-color-adjust:
-      exact;
+    print-color-adjust: exact;
   }
 
   .report-print-header {
@@ -2053,15 +2075,13 @@ select.form-input {
         1400px
       );
 
-    padding-top:
-      22px;
+    padding-top: 22px;
   }
 
   .topbar {
     height: auto;
 
-    align-items:
-      flex-start;
+    align-items: flex-start;
 
     padding:
       14px
@@ -2079,33 +2099,27 @@ select.form-input {
   }
 
   .page-heading-row {
-    align-items:
-      flex-start;
+    align-items: flex-start;
 
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .date-controls {
     width: 100%;
 
-    flex-wrap:
-      wrap;
+    flex-wrap: wrap;
   }
 
   .date-controls .date-input {
     flex: 1;
 
-    min-width:
-      150px;
+    min-width: 150px;
   }
 
   .search-panel-header {
-    align-items:
-      stretch;
+    align-items: stretch;
 
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .search-controls {
@@ -2119,11 +2133,9 @@ select.form-input {
   }
 
   .profile-date-controls {
-    align-items:
-      stretch;
+    align-items: stretch;
 
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .profile-date-controls > div {
@@ -2131,11 +2143,9 @@ select.form-input {
   }
 
   .teacher-submit-row {
-    align-items:
-      stretch;
+    align-items: stretch;
 
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .report-controls,
@@ -2147,8 +2157,7 @@ select.form-input {
   .report-button-group {
     width: 100%;
 
-    grid-column:
-      auto;
+    grid-column: auto;
   }
 
   .report-button-group button {
@@ -2158,11 +2167,28 @@ select.form-input {
   }
 
   .report-result-header {
-    align-items:
-      flex-start;
+    align-items: flex-start;
 
-    flex-direction:
-      column;
+    flex-direction: column;
+  }
+
+
+  /* ADMIN EDIT MOBILE */
+
+  .admin-edit-toolbar {
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .admin-edit-actions {
+    justify-content: flex-start;
+  }
+
+  .admin-edit-actions button {
+    flex:
+      1 1
+      150px;
   }
 
 }
@@ -2178,11 +2204,9 @@ select.form-input {
 
   .brand-block,
   .login-content {
-    padding-left:
-      22px;
+    padding-left: 22px;
 
-    padding-right:
-      22px;
+    padding-right: 22px;
   }
 
   .brand-block h1 {
@@ -2204,8 +2228,7 @@ select.form-input {
   }
 
   .search-controls {
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .topbar-subtitle {
@@ -2217,11 +2240,20 @@ select.form-input {
   }
 
   .report-button-group {
-    flex-direction:
-      column;
+    flex-direction: column;
   }
 
   .report-button-group button {
+    width: 100%;
+  }
+
+  .admin-edit-actions {
+    flex-direction: column;
+
+    width: 100%;
+  }
+
+  .admin-edit-actions button {
     width: 100%;
   }
 
