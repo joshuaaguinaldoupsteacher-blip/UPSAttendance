@@ -127,20 +127,20 @@
   var prevAdminRender=window.renderAdminClassEditTable;
   window.renderTeacherAttendance=function(){
     var result=prevTeacherRender.apply(this,arguments);
-    enhanceTable("#teacherAttendanceBody",window.teacherAttendanceData);
+    enhanceTable("#teacherAttendanceBody",teacherAttendanceData);
     return result;
   };
   window.renderAdminClassEditTable=function(){
     var result=prevAdminRender.apply(this,arguments);
-    enhanceTable("#classDetailBody",window.adminClassEditData);
+    enhanceTable("#classDetailBody",adminClassEditData);
     return result;
   };
   window.submitAttendance=function(){
-    if(!valid(window.teacherAttendanceData))return;
+    if(!valid(teacherAttendanceData))return;
     return originalSubmit.apply(this,arguments);
   };
   window.saveAdminAttendance=function(){
-    if(!valid(window.adminClassEditData))return;
+    if(!valid(adminClassEditData))return;
     return originalAdminSave.apply(this,arguments);
   };
   window.renderAbsentReport=renderDaily;
