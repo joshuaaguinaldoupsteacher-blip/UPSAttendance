@@ -147,7 +147,76 @@
   window.renderAbsentReport=renderDaily;
   window.printAbsentReport=printDaily;
 
+
+  // Shared controls for ADMIN and TEACHER date-range attendance reports.
+  function addDateRangeFilters() {
+    ["admin", "teacher"].forEach(function(role) {
+      var section=document.getElementById(role+"AttendanceReportSection");
+      var controls=document.getElementById(role+"ReportStartDate")?.closest(".report-controls");
+      if(!controls || controls.querySelector(".ups-range-filter-panel"))return;
+      var wrapper=document.createElement("div");
+      wrapper.className="ups-range-filter-panel";
+      wrapper.innerHTML='<strong>Absence Reason Filters (Date-Range Report)</strong>'+
+        '<label><input type="checkbox" class="ups-range-empty"> Include empty remarks</label>'+
+        '<label><input type="checkbox" class="ups-range-no-update"> Include "No Update from Parents"</label>'+
+        '<small>Unchecked absences count as present-equivalent in this summary only. The original records remain absent.</small>';
+      controls.insertAdjacentElement("afterend",wrapper);
+      var empty=wrapper.querySelector(".ups-range-empty");
+      var noUpdate=wrapper.querySelector(".ups-range-no-update");
+      // Both report views share global checkbox state, but only the active report's
+      // values are relevant when the Generate button is clicked.
+      empty.checked=!!document.getElementById("reportIncludeEmptyRemarks")?.checked;
+      noUpdate.checked=!!document.getElementById("reportIncludeNoUpdate")?.checked;
+      function changed() {
+        document.getElementById("reportIncludeEmptyRemarks").checked=empty.checked;
+        document.getElementById("reportIncludeNoUpdate").checked=noUpdate.checked;
+        document.getElementById(role+"PrintReportButton").disabled=true;
+        document.getElementById(role+"ReportMessage").textContent="Filters changed. Generate the report again to refresh all figures.";
+        document.querySelectorAll(".ups-range-empty").forEach(function(el){el.checked=empty.checked;});
+        document.querySelectorAll(".ups-range-no-update").forEach(function(el){el.checked=noUpdate.checked;});
+      }
+      empty.addEventListener("change",changed);
+      noUpdate.addEventListener("change",changed);
+    });
+  }
+  function updateDateRangeNotice(role, data) {
+    var id=role==="admin"?"adminReportSummary":"teacherReportSummary";
+    var target=document.getElementById(id);
+    if(!target)return;
+    var old=document.getElementById(role+"RangeFilterNotice");
+    if(old)old.remove();
+    var s=data.summary||{};
+    var note=document.createElement("div");
+    note.className="ups-range-summary";
+    note.id=role+"RangeFilterNotice";
+    note.innerHTML="<strong>Recorded absences: "+(s.originalAbsent ?? s.absent ?? 0)+
+      "</strong><strong>Filtered absences: "+(s.absent || 0)+
+      "</strong><strong>Excluded (present-equivalent for this report): "+((s.excludedEmptyAbsences || 0)+(s.excludedNoUpdateAbsences || 0))+
+      "</strong><small>Empty remarks: "+(s.includeEmptyRemarks?"Included":"Excluded")+
+      " | No Update from Parents: "+(s.includeNoUpdateFromParents?"Included":"Excluded")+"</small>";
+    target.insertAdjacentElement("afterend",note);
+  }
+  var renderAdminRange=window.renderAdminAttendanceReport;
+  var renderTeacherRange=window.renderTeacherAttendanceReport;
+  window.renderAdminAttendanceReport=function(data){
+    var out=renderAdminRange.apply(this,arguments);
+    updateDateRangeNotice("admin",data);
+    return out;
+  };
+  window.renderTeacherAttendanceReport=function(data){
+    var out=renderTeacherRange.apply(this,arguments);
+    updateDateRangeNotice("teacher",data);
+    return out;
+  };
   document.addEventListener("DOMContentLoaded",function(){
+    ["reportIncludeEmptyRemarks","reportIncludeNoUpdate"].forEach(function(id){
+      if(!document.getElementById(id)){
+        var control=document.createElement("input");
+        control.type="checkbox";control.id=id;control.hidden=true;
+        document.body.appendChild(control);
+      }
+    });
+    addDateRangeFilters();
     var panel=document.getElementById("absenteeReportArea");
     if(panel){
       var controls=document.createElement("div");
@@ -168,6 +237,10 @@
       '.ups-absent-page p{font-size:12px;margin:0 0 10px}.ups-absent-page table{width:100%;border-collapse:collapse}'+
       '.ups-absent-page th,.ups-absent-page td{padding:7px;border:1px solid #ddd;text-align:left}'+
       '.ups-absence-select{width:100%;padding:6px;margin-bottom:5px;border:1px solid #ccc;border-radius:5px}';
+    style.textContent += '.ups-range-filter-panel{margin:12px 0 20px;padding:12px;background:#f6f2fb;border-radius:8px;display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;font-size:13px}'+
+      '.ups-range-filter-panel label{display:flex;gap:6px;align-items:center}'+
+      '.ups-range-filter-panel small{width:100%;color:#666}.ups-range-summary{display:flex;flex-wrap:wrap;gap:10px 20px;margin:12px 0 16px;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px}'+
+      '.ups-range-summary small{width:100%;color:#666}';
     document.head.appendChild(style);
   });
 })();
