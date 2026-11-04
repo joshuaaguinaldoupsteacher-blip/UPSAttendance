@@ -3573,6 +3573,9 @@ async function generateAdminAttendanceReport() {
 
         endDate,
 
+        includeEmptyRemarks: !!document.getElementById("reportIncludeEmptyRemarks")?.checked,
+        includeNoUpdateFromParents: !!document.getElementById("reportIncludeNoUpdate")?.checked,
+
         classCode
 
       });
@@ -3995,7 +3998,10 @@ async function generateTeacherAttendanceReport() {
 
         startDate,
 
-        endDate
+        endDate,
+
+        includeEmptyRemarks: !!document.getElementById("reportIncludeEmptyRemarks")?.checked,
+        includeNoUpdateFromParents: !!document.getElementById("reportIncludeNoUpdate")?.checked
 
       });
 
@@ -4679,6 +4685,16 @@ function printAttendanceReport(
             data.range?.endDate ||
             ""
           )}
+        </p>
+
+        <p>
+          Report filters: Empty remarks
+          ${summary.includeEmptyRemarks ? "Included" : "Excluded"};
+          No Update from Parents
+          ${summary.includeNoUpdateFromParents ? "Included" : "Excluded"}.
+          Recorded absences: ${summary.originalAbsent ?? summary.absent ?? 0}.
+          Filtered absences: ${summary.absent ?? 0}.
+          Report-only adjustments: ${(summary.excludedEmptyAbsences || 0) + (summary.excludedNoUpdateAbsences || 0)}.
         </p>
 
       </div>
