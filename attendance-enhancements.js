@@ -111,7 +111,8 @@
       select.addEventListener("change",sync);
       old.addEventListener("input",sync);
       status.addEventListener("change",sync);
-      sync();
+      select.required=status.value==="ABSENT";
+      old.required=status.value==="ABSENT" && select.value==="Others";
     });
   }
   function valid(data) {
